@@ -1,0 +1,63 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { API_URL } from '../../lib/api';
+
+let s = { organizacion: '', apetito_riesgo: 9 };
+let error = '';
+try {
+  const res = await fetch(`${API_URL}/settings`);
+  s = await res.json();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+---
+<Layout title="Configuración · CyberRisk 360" active="config" crumb="<b>Configuración</b>">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Gobierno del riesgo · ISO 31000 / 27005</div>
+      <h1>Configuración organizacional</h1>
+      <p>Parámetros que rigen la evaluación del riesgo en toda la plataforma.</p>
+    </div>
+  </div>
+
+  {error && <div class="flash flash-danger">{error}</div>}
+  <div id="msg"></div>
+
+  <form id="form" class="card" style="max-width:680px">
+    <div class="field" style="margin-bottom:18px">
+      <label>Organización</label>
+      <input class="form-control" name="organizacion" value={s.organizacion} />
+    </div>
+    <hr class="divider" />
+    <div class="card-title">Apetito de riesgo</div>
+    <div class="card-sub">Puntaje de <b>riesgo residual</b> máximo tolerado (1–25). Todo riesgo por encima se marca como <b>excedido</b> y requiere escalamiento.</div>
+    <div class="field" style="max-width:320px">
+      <label>Umbral de apetito de riesgo (1–25)</label>
+      <input class="form-control mono" type="number" name="apetito_riesgo" min="1" max="25" value={s.apetito_riesgo} />
+      <span class="hint">Referencia: 1–4 Bajo · 5–9 Medio · 10–14 Alto · 15–25 Crítico.</span>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">Guardar configuración</button></div>
+  </form>
+</Layout>
+
+<script>
+  import { API_URL } from '../../lib/api';
+  const form = document.getElementById('form') as HTMLFormElement;
+  const msg = document.getElementById('msg');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const body = {
+      organizacion: fd.get('organizacion'),
+      apetito_riesgo: Number(fd.get('apetito_riesgo')),
+      usuario: 'Administrador (frontend)',
+    };
+    const res = await fetch(`${API_URL}/settings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (msg) msg.innerHTML = res.ok
+      ? '<div class="flash flash-success">Configuración actualizada correctamente.</div>'
+      : `<div class="flash flash-danger">${data.error || 'Error al guardar.'}</div>`;
+  });
+</script>

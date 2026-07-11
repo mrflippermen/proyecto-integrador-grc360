@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% set active = 'risks' %}
+{% block title %}{{ riesgo.codigo }} · CyberRisk 360{% endblock %}
+{% block crumb %}<a href="{{ url_for('risks.listar') }}">Riesgos</a> · <b>{{ riesgo.codigo }}</b>{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">{{ riesgo.codigo }} · Estado: {{ riesgo.estado }}</div>
+    <h1>{{ riesgo.amenaza.nombre }}</h1>
+    <p>{{ riesgo.descripcion or 'Riesgo sobre ' + riesgo.activo.nombre }}</p>
+    <div class="row mt" style="gap:8px">
+      {% if riesgo.amenaza.attack_id %}<span class="tag">MITRE ATT&CK {{ riesgo.amenaza.attack_id }} · {{ riesgo.amenaza.attack_tactica }}</span>{% endif %}
+      {% if riesgo.sla_vencido %}
+        <span class="chip chip-critico">SLA vencido · {{ -riesgo.sla_restante }} días de retraso</span>
+      {% elif riesgo.estado in ['Controlado','Aceptado','Cerrado'] %}
+        <span class="chip chip-bajo">Dentro de SLA</span>
+      {% else %}
+        <span class="chip chip-medio">SLA: {{ riesgo.sla_restante }} días restantes (meta {{ riesgo.sla_dias }}d)</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row">
+    <a class="btn" href="{{ url_for('risks.editar', risk_id=riesgo.id) }}">Editar</a>
+    <a class="btn btn-primary" href="{{ url_for('treatments.nuevo', risk_id=riesgo.id) }}">
+      <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Añadir tratamiento
+    </a>
+  </div>
+</div>
+
+<!-- Resumen del riesgo -->
+<div class="grid grid-3">
+  <div class="card">
+    <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px">Componentes</div>
+    <div class="stack" style="gap:10px">
+      <div><span class="dim" style="font-size:.76rem">Activo</span><br><b>{{ riesgo.activo.codigo }}</b> · {{ riesgo.activo.nombre }}</div>
+      <div><span class="dim" style="font-size:.76rem">Vulnerabilidad</span><br>{{ riesgo.vulnerabilidad.nombre }}</div>
+    </div>
+  </div>
+
+  <div class="card center">
+    <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Riesgo inherente</div>
+    <div style="font-family:var(--font-display); font-size:3rem; font-weight:700; line-height:1; color:{{ riesgo.nivel_inherente[2] }}">{{ riesgo.puntaje_inherente }}</div>
+    <div class="chip chip-{{ riesgo.nivel_inherente[0]|lower }}" style="margin-top:10px">{{ riesgo.nivel_inherente[0] }}</div>
+    <div class="dim" style="font-size:.76rem; margin-top:8px">P {{ riesgo.probabilidad }} × I {{ riesgo.impacto }}</div>
+  </div>
+
+  <div class="card center">
+    <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Riesgo residual <span class="dim">(Fase 4)</span></div>
+    <div style="font-family:var(--font-display); font-size:3rem; font-weight:700; line-height:1; color:{{ riesgo.nivel_residual[2] }}">{{ riesgo.puntaje_residual }}</div>
+    <div class="chip chip-{{ riesgo.nivel_residual[0]|lower }}" style="margin-top:10px">{{ riesgo.nivel_residual[0] }}</div>
+    <div class="chip chip-bajo" style="margin-top:8px">Reducción {{ riesgo.reduccion_pct }}%</div>
+  </div>
+</div>
+
+{% if riesgo.controles_existentes %}
+<div class="card mt">
+  <div class="card-title">Controles existentes</div>
+  <p class="muted" style="margin:0">{{ riesgo.controles_existentes }}</p>
+</div>
+{% endif %}
+
+{% set v = riesgo.vulnerabilidad %}
+{% if v.cvss_score is not none %}
+<div class="card mt" style="border-color:rgba(76,130,247,.25)">
+  <div class="card-title">
+    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+    Inteligencia de amenazas · {{ v.cve_id }}
+  </div>
+  <div class="card-sub">Datos de NVD, EPSS y CISA KEV para la vulnerabilidad asociada.</div>
+  <div class="grid grid-4">
+    <div><div class="dim" style="font-size:.72rem">CVSS 3.1</div><div class="mono" style="font-size:1.4rem; font-weight:600; color:{{ '#d63a3a' if v.cvss_score>=9 else ('#e8590c' if v.cvss_score>=7 else '#e0a800') }}">{{ v.cvss_score }}</div><div class="dim" style="font-size:.72rem">{{ v.cvss_severidad }}</div></div>
+    <div><div class="dim" style="font-size:.72rem">EPSS (30 días)</div><div class="mono" style="font-size:1.4rem; font-weight:600">{{ v.epss_pct }}%</div><div class="dim" style="font-size:.72rem">Prob. de explotación</div></div>
+    <div><div class="dim" style="font-size:.72rem">CISA KEV</div><div style="font-size:1.1rem; font-weight:600; margin-top:6px">{% if v.kev %}<span class="chip chip-critico">Explotada</span>{% else %}<span class="dim">No listada</span>{% endif %}</div></div>
+    <div><div class="dim" style="font-size:.72rem">VPR (prioridad)</div><div class="mono" style="font-size:1.4rem; font-weight:600; color:#d63a3a">{{ v.vpr }}</div><div class="dim" style="font-size:.72rem">{{ v.vpr_nivel }}</div></div>
+  </div>
+  {% if v.cvss_vector %}<div class="mono dim mt" style="font-size:.76rem">{{ v.cvss_vector }}</div>{% endif %}
+</div>
+{% endif %}
+
+<!-- Tratamiento (Fase 3) -->
+<div class="card mt">
+  <div class="row between">
+    <div>
+      <div class="card-title">Plan de tratamiento <span class="dim" style="font-weight:400; font-size:.8rem">Fase 3 · ISO/IEC 27002:2022</span></div>
+      <div class="card-sub">Estrategias de respuesta y controles aplicados a este riesgo.</div>
+    </div>
+    <a class="btn btn-sm btn-primary" href="{{ url_for('treatments.nuevo', risk_id=riesgo.id) }}">Añadir</a>
+  </div>
+
+  {% if riesgo.tratamientos %}
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Estrategia</th><th>Control ISO</th><th>Descripción / Responsable</th><th>Eficacia</th><th>Estado</th><th></th></tr></thead>
+      <tbody>
+        {% for t in riesgo.tratamientos %}
+        <tr>
+          <td><span class="tag {{ 'tag-brand' if t.estrategia in ['Mitigar','Evitar'] }}">{{ t.estrategia }}</span></td>
+          <td>{% if t.control %}<span class="code">{{ t.control.codigo_iso }}</span><br><span class="dim" style="font-size:.76rem">{{ t.control.nombre|truncate(30) }}</span>{% else %}<span class="dim">—</span>{% endif %}</td>
+          <td class="stack" style="gap:2px"><span>{{ t.descripcion }}</span><span class="dim" style="font-size:.76rem">Responsable: {{ t.responsable or '—' }}{% if t.fecha_objetivo %} · Meta: {{ t.fecha_objetivo.strftime('%d/%m/%Y') }}{% endif %}</span></td>
+          <td class="mono">{{ t.eficacia }}%</td>
+          <td>
+            <form method="post" action="{{ url_for('treatments.cambiar_estado', treatment_id=t.id) }}">
+              <select class="form-control" style="padding:5px 8px; font-size:.78rem" name="estado" onchange="this.form.submit()">
+                {% for e in ['Propuesto','En Implementación','Implementado','Verificado'] %}
+                <option value="{{ e }}" {{ 'selected' if t.estado == e }}>{{ e }}</option>
+                {% endfor %}
+              </select>
+            </form>
+          </td>
+          <td class="right">
+            <form method="post" action="{{ url_for('treatments.eliminar', treatment_id=t.id) }}" onsubmit="return confirm('¿Eliminar este tratamiento?')">
+              <button class="btn btn-sm btn-danger" type="submit">×</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="dim mt" style="font-size:.78rem">Eficacia combinada de controles: <b>{{ (riesgo.eficacia_total*100)|round }}%</b> — el riesgo residual se recalcula automáticamente.</div>
+  {% else %}
+  <div class="empty-state" style="padding:30px"><p>Este riesgo aún no tiene tratamiento. El riesgo residual es igual al inherente.</p>
+  <a class="btn btn-primary mt" href="{{ url_for('treatments.nuevo', risk_id=riesgo.id) }}">Definir tratamiento</a></div>
+  {% endif %}
+</div>
+
+<!-- Observaciones (Fase 5) -->
+<div class="card mt">
+  <div class="card-title">Observaciones asociadas <span class="dim" style="font-weight:400; font-size:.8rem">Fase 5</span></div>
+  {% if riesgo.observaciones %}
+  <ul class="list-plain">
+    {% for o in riesgo.observaciones %}
+    <li class="obs">
+      <div class="obs-meta"><span class="tag {{ 'tag-brand' if o.tipo=='Recomendación' }}">{{ o.tipo }}</span> {{ o.autor }} · {{ o.creado_en.strftime('%d/%m/%Y') }}</div>
+      <div style="font-size:.9rem">{{ o.contenido }}</div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="dim" style="margin:0">Sin observaciones. Puede agregarlas desde el módulo de <a href="{{ url_for('communication.index') }}">Comunicación</a>.</p>
+  {% endif %}
+</div>
+
+<div class="mt">
+  <form method="post" action="{{ url_for('risks.eliminar', risk_id=riesgo.id) }}" onsubmit="return confirm('¿Eliminar el riesgo {{ riesgo.codigo }} y todos sus tratamientos?')">
+    <button class="btn btn-danger btn-sm" type="submit">Eliminar riesgo</button>
+  </form>
+</div>
+{% endblock %}

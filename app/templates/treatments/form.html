@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% set active = 'treatments' %}
+{% block title %}Tratamiento · {{ riesgo.codigo }}{% endblock %}
+{% block crumb %}<a href="{{ url_for('risks.detalle', risk_id=riesgo.id) }}">{{ riesgo.codigo }}</a> · <b>Nuevo tratamiento</b>{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 3 — Tratamiento del riesgo</div>
+    <h1>Definir tratamiento</h1>
+    <p>Seleccione la estrategia de respuesta y, si aplica, un control de referencia ISO/IEC 27002:2022. La eficacia estimada recalcula el riesgo residual.</p>
+  </div>
+  <div class="card" style="padding:14px 18px; margin:0">
+    <div class="dim" style="font-size:.72rem">Riesgo inherente</div>
+    <div class="chip chip-{{ riesgo.nivel_inherente[0]|lower }}" style="margin-top:4px">{{ riesgo.puntaje_inherente }} · {{ riesgo.nivel_inherente[0] }}</div>
+  </div>
+</div>
+
+<form method="post" class="card" style="max-width:820px">
+  <div class="form-grid">
+    <div class="field">
+      <label>Estrategia de respuesta <span class="req">*</span></label>
+      <select class="form-control" name="estrategia" id="estrategia" onchange="toggleEficacia()">
+        {% for e in estrategias %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+      </select>
+      <span class="hint">Mitigar · Transferir · Aceptar · Evitar</span>
+    </div>
+    <div class="field">
+      <label>Control de referencia (ISO 27002:2022)</label>
+      <select class="form-control" name="control_id">
+        <option value="">— Sin control específico —</option>
+        {% for c in controles %}<option value="{{ c.id }}">{{ c.codigo_iso }} · {{ c.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field full">
+      <label>Control propuesto / plan de acción</label>
+      <textarea class="form-control" name="descripcion" placeholder="Describa el control a implementar...">{{ tratamiento.descripcion if tratamiento else '' }}</textarea>
+    </div>
+    <div class="field">
+      <label>Responsable</label>
+      <input class="form-control" name="responsable" placeholder="Administrador de TI">
+    </div>
+    <div class="field">
+      <label>Fecha objetivo</label>
+      <input class="form-control" type="date" name="fecha_objetivo">
+    </div>
+    <div class="field" id="efi-field">
+      <label>Eficacia estimada del control (%)</label>
+      <input class="form-control" type="number" name="eficacia" min="0" max="90" value="50">
+      <span class="hint">0–90 %. Reduce el riesgo residual. No aplica para “Aceptar”.</span>
+    </div>
+    <div class="field">
+      <label>Estado del control</label>
+      <select class="form-control" name="estado">
+        {% for e in estados %}<option value="{{ e }}">{{ e }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="card mt" style="background:var(--bg-2); padding:14px 16px">
+    <div class="dim" style="font-size:.78rem">
+      <b>Cómo se calcula el riesgo residual:</b> los controles de mitigación se combinan de forma multiplicativa
+      (rendimientos decrecientes) con un máximo de 90% de reducción. “Aceptar” mantiene el riesgo inherente;
+      “Evitar” lo lleva al mínimo (se retira el activo o proceso).
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Guardar tratamiento</button>
+    <a class="btn btn-ghost" href="{{ url_for('risks.detalle', risk_id=riesgo.id) }}">Cancelar</a>
+  </div>
+</form>
+
+<script>
+function toggleEficacia(){
+  var e = document.getElementById('estrategia').value;
+  var f = document.getElementById('efi-field');
+  f.style.opacity = (e === 'Aceptar') ? .4 : 1;
+  f.querySelector('input').disabled = (e === 'Aceptar');
+}
+</script>
+{% endblock %}

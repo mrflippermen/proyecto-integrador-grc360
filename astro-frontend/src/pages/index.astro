@@ -1,0 +1,211 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ChartCanvas from '../components/ChartCanvas.astro';
+import { getOverview, PALETA, chipClass, type Overview } from '../lib/api';
+
+let data: Overview | null = null;
+let error = '';
+try {
+  data = await getOverview();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+
+// --- Utilidades de nivel para colorear la matriz ---
+function nivelColor(p: number): string {
+  if (p <= 4) return PALETA.sev.Bajo;
+  if (p <= 9) return PALETA.sev.Medio;
+  if (p <= 14) return PALETA.sev.Alto;
+  return PALETA.sev['Crítico'];
+}
+
+const niveles = ['Bajo', 'Medio', 'Alto', 'Crítico'];
+
+// --- Configuraciones de gráficos (se serializan a las islas) ---
+let trendCfg: unknown = null;
+let donutCfg: unknown = null;
+if (data) {
+  const H = data.historial;
+  const cesMax = Math.max(...H.ces, 1);
+  const critMax = Math.max(...H.criticos, 1);
+  trendCfg = {
+    type: 'line',
+    data: {
+      labels: H.fechas,
+      datasets: [
+        { label: 'Cyber Exposure Score', data: H.ces.map((v) => Math.round((v / cesMax) * 100)),
+          _real: H.ces, borderColor: PALETA.brand, backgroundColor: 'rgba(76,130,247,.12)',
+          borderWidth: 2, fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5 },
+        { label: 'Riesgos críticos', data: H.criticos.map((v) => Math.round((v / critMax) * 100)),
+          _real: H.criticos, borderColor: PALETA.sev['Crítico'], borderWidth: 2,
+          borderDash: [5, 4], fill: false, tension: 0.35, pointRadius: 0, pointHoverRadius: 5 },
+      ],
+    },
+    options: {
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: { y: { min: 0, max: 105, ticks: { callback: (v: number) => v + '%' } }, x: { grid: { display: false } } },
+      plugins: { legend: { position: 'top', align: 'end' }, tooltip: { _realValues: true } },
+    },
+  };
+  donutCfg = {
+    type: 'doughnut',
+    data: {
+      labels: niveles,
+      datasets: [{ data: niveles.map((n) => data!.dist_residual[n] || 0),
+        backgroundColor: niveles.map((n) => PALETA.sev[n]), borderColor: '#182233', borderWidth: 2 }],
+    },
+    options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom' } } },
+  };
+}
+
+const totalR = data ? data.kpis.riesgos : 0;
+---
+<Layout title="Panel de monitoreo · CyberRisk 360" active="dashboard" crumb="<b>Panel de monitoreo</b> · Fase 6" organizacion={data?.organizacion}>
+  {error && <div class="flash flash-danger">{error}</div>}
+  {data && (
+    <>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Fase 6 — Monitoreo y supervisión</div>
+          <h1>Panel de riesgo cibernético</h1>
+          <p>Estado consolidado del riesgo organizacional: exposición inherente, eficacia del tratamiento y riesgo residual vigente.</p>
+        </div>
+        <a class="btn btn-primary" href="/riesgos/nuevo">+ Nuevo riesgo</a>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="kpi"><div class="k-label">Activos valorados</div><div class="k-value">{data.kpis.activos}</div><div class="k-foot">Inventario de información</div></div>
+        <div class="kpi a"><div class="k-label">Riesgos identificados</div><div class="k-value">{data.kpis.riesgos}</div><div class="k-foot">{data.criticos.length} requieren atención prioritaria</div></div>
+        <div class="kpi"><div class="k-label">Controles aplicados</div><div class="k-value">{data.kpis.controles}</div><div class="k-foot">Tratamientos ISO/IEC 27002:2022</div></div>
+        <div class="kpi g"><div class="k-label">Reducción de riesgo</div><div class="k-value">{data.kpis.reduccion}%</div><div class="k-foot">Inherente → residual (global)</div></div>
+      </div>
+
+      <div class="grid mt" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="card" style="display:flex; align-items:center; gap:18px;">
+          <div style={`width:104px;height:104px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--sev-${chipClass(data.ces.nivel)}) calc(${Math.round(data.ces.score/1000*100)}*1%), var(--bg-2) 0);display:grid;place-items:center`}>
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center">
+              <div><div style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;line-height:1">{data.ces.score}</div><div class="dim" style="font-size:.6rem">/ 1000</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="dim" style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em">Cyber Exposure Score</div>
+            <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:600;margin:3px 0">Exposición <span style={`color:var(--sev-${chipClass(data.ces.nivel)})`}>{data.ces.nivel}</span></div>
+            <div class="dim" style="font-size:.76rem;max-width:22ch">Riesgo residual agregado, ponderado por criticidad de activos.</div>
+          </div>
+        </div>
+        <div class="card" style={data.sobre_apetito.length ? 'border-color:rgba(214,58,58,.4)' : ''}>
+          <div class="k-label" style="color:var(--text-muted)">Exceden el apetito de riesgo</div>
+          <div class="k-value" style={`font-family:var(--font-display);font-size:2.1rem;font-weight:700;color:${data.sobre_apetito.length ? 'var(--sev-critico)' : 'var(--sev-bajo)'}`}>{data.sobre_apetito.length}</div>
+          <div class="k-foot">Residual &gt; {data.apetito_riesgo} (umbral). {data.sobre_apetito.length ? 'Requieren escalamiento.' : 'Dentro de tolerancia.'}</div>
+        </div>
+        <div class="card" style={data.sla_vencidos.length ? 'border-color:rgba(232,89,12,.4)' : ''}>
+          <div class="k-label" style="color:var(--text-muted)">SLA de remediación vencidos</div>
+          <div class="k-value" style={`font-family:var(--font-display);font-size:2.1rem;font-weight:700;color:${data.sla_vencidos.length ? 'var(--sev-alto)' : 'var(--sev-bajo)'}`}>{data.sla_vencidos.length}</div>
+          <div class="k-foot">Riesgos abiertos fuera de su ventana de tratamiento.</div>
+        </div>
+      </div>
+
+      <div class="grid grid-2 mt" style="grid-template-columns: 1.05fr .95fr;">
+        <div class="card">
+          <div class="card-title">Matriz de riesgo 5×5</div>
+          <div class="card-sub">Distribución por Probabilidad × Impacto (riesgo inherente).</div>
+          <div class="matrix">
+            <div class="axis-y">Impacto →</div>
+            {Array.from({ length: 5 }).map((_, fila) => {
+              const impacto = 5 - fila;
+              return Array.from({ length: 5 }).map((_, col) => {
+                const prob = col + 1;
+                const n = data!.matriz[fila][col];
+                return <div class={`cell ${n === 0 ? 'empty' : ''}`} style={`background:${n === 0 ? 'rgba(255,255,255,.035)' : nivelColor(impacto * prob)}`} title={`P${prob} × I${impacto} = ${impacto * prob}`}><span class="cnt">{n}</span></div>;
+              });
+            })}
+            <div></div>
+            {[1, 2, 3, 4, 5].map((p) => <div class="head-x">{p}</div>)}
+          </div>
+          <div class="center dim" style="font-size:.72rem; margin-top:2px;">Probabilidad →</div>
+          <div class="matrix-legend">
+            <span><i style="background:var(--sev-bajo)"></i> Bajo (1–4)</span>
+            <span><i style="background:var(--sev-medio)"></i> Medio (5–9)</span>
+            <span><i style="background:var(--sev-alto)"></i> Alto (10–14)</span>
+            <span><i style="background:var(--sev-critico)"></i> Crítico (15–25)</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Riesgo inherente vs. residual</div>
+          <div class="card-sub">Efecto del tratamiento sobre la distribución de niveles.</div>
+          <div style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); margin-bottom:10px;">Inherente</div>
+          {niveles.slice().reverse().map((n) => (
+            <div class="bar-row">
+              <span class="bar-label">{n}</span>
+              <div class="bar-track"><div class="bar-fill" style={`width:${Math.round((data!.dist_inherente[n] / (totalR || 1)) * 100)}%; background:var(--sev-${chipClass(n)})`}></div></div>
+              <span class="bar-val">{data.dist_inherente[n]}</span>
+            </div>
+          ))}
+          <hr class="divider" style="margin:16px 0;" />
+          <div style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--text-dim); margin-bottom:10px;">Residual <span class="chip chip-bajo" style="margin-left:6px">−{data.kpis.reduccion}%</span></div>
+          {niveles.slice().reverse().map((n) => (
+            <div class="bar-row">
+              <span class="bar-label">{n}</span>
+              <div class="bar-track"><div class="bar-fill" style={`width:${Math.round((data!.dist_residual[n] / (totalR || 1)) * 100)}%; background:var(--sev-${chipClass(n)})`}></div></div>
+              <span class="bar-val">{data.dist_residual[n]}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="grid grid-2 mt" style="grid-template-columns: 1.5fr .5fr">
+        <div class="card">
+          <div class="card-title">Tendencia de exposición (13 semanas)</div>
+          <div class="card-sub">Evolución del Cyber Exposure Score y de los riesgos críticos.</div>
+          <ChartCanvas id="chartTrend" height={240} config={trendCfg} />
+        </div>
+        <div class="card">
+          <div class="card-title">Riesgo residual</div>
+          <div class="card-sub">Por nivel.</div>
+          <ChartCanvas id="chartDonut" height={200} config={donutCfg} />
+        </div>
+      </div>
+
+      <div class="card mt">
+        <div class="row between">
+          <div><div class="card-title">Riesgos prioritarios (residual ≥ Alto)</div><div class="card-sub">Requieren seguimiento inmediato.</div></div>
+          <a class="btn btn-sm" href="/riesgos">Ver todos</a>
+        </div>
+        {data.criticos.length ? (
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Código</th><th>Activo</th><th>Amenaza</th><th>Inherente</th><th>Residual</th><th>Estado</th></tr></thead>
+              <tbody>
+                {data.criticos.slice(0, 6).map((r) => (
+                  <tr onclick={`window.location='/riesgos/${r.id}'`} style="cursor:pointer">
+                    <td><span class="code">{r.codigo}</span></td>
+                    <td>{r.activo.nombre}</td>
+                    <td class="muted">{r.amenaza.nombre}</td>
+                    <td><span class={`chip chip-${chipClass(r.nivel_inherente.nombre)}`}>{r.puntaje_inherente} · {r.nivel_inherente.nombre}</span></td>
+                    <td><span class={`chip chip-${chipClass(r.nivel_residual.nombre)}`}>{r.puntaje_residual} · {r.nivel_residual.nombre}</span></td>
+                    <td><span class="tag">{r.estado}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <div class="empty-state"><h3>Sin riesgos prioritarios</h3></div>}
+      </div>
+
+      <div class="card mt" id="comunicacion">
+        <div class="card-title">Comunicación reciente</div>
+        <div class="card-sub">Últimas observaciones y recomendaciones (Fase 5).</div>
+        <ul class="list-plain">
+          {data.observaciones.map((o) => (
+            <li class="obs">
+              <div class="obs-meta"><span class={`tag ${o.tipo === 'Recomendación' ? 'tag-brand' : ''}`}>{o.tipo}</span> {o.autor} · {new Date(o.creado_en).toLocaleDateString('es')}</div>
+              <div style="font-size:.88rem">{o.contenido}</div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
+  )}
+</Layout>

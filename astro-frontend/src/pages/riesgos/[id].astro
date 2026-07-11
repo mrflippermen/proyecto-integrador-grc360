@@ -1,0 +1,113 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getRisk, chipClass, type Riesgo } from '../../lib/api';
+
+const { id } = Astro.params;
+let r: Riesgo | null = null;
+let error = '';
+try {
+  r = await getRisk(id!);
+} catch (e) {
+  error = 'No se pudo cargar el riesgo (¿API Flask activa?).';
+}
+const v = r?.vulnerabilidad;
+---
+<Layout title={`${r?.codigo ?? 'Riesgo'} · CyberRisk 360`} active="risks" crumb={`<a href="/riesgos">Riesgos</a> · <b>${r?.codigo ?? ''}</b>`}>
+  {error && <div class="flash flash-danger">{error}</div>}
+  {r && (
+    <>
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">{r.codigo} · Estado: {r.estado}</div>
+          <h1>{r.amenaza.nombre}</h1>
+          <p>{r.descripcion || `Riesgo sobre ${r.activo.nombre}`}</p>
+          <div class="row mt" style="gap:8px">
+            {r.amenaza.attack_id && <span class="tag">MITRE ATT&CK {r.amenaza.attack_id} · {r.amenaza.attack_tactica}</span>}
+            {r.sla_vencido
+              ? <span class="chip chip-critico">SLA vencido · {-r.sla_restante} días de retraso</span>
+              : (['Controlado', 'Aceptado', 'Cerrado'].includes(r.estado)
+                ? <span class="chip chip-bajo">Dentro de SLA</span>
+                : <span class="chip chip-medio">SLA: {r.sla_restante} días restantes (meta {r.sla_dias}d)</span>)}
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card">
+          <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px">Componentes</div>
+          <div class="stack" style="gap:10px">
+            <div><span class="dim" style="font-size:.76rem">Activo</span><br /><b>{r.activo.codigo}</b> · {r.activo.nombre}</div>
+            <div><span class="dim" style="font-size:.76rem">Vulnerabilidad</span><br />{r.vulnerabilidad.nombre}</div>
+          </div>
+        </div>
+        <div class="card center">
+          <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Riesgo inherente</div>
+          <div style={`font-family:var(--font-display); font-size:3rem; font-weight:700; line-height:1; color:${r.nivel_inherente.color}`}>{r.puntaje_inherente}</div>
+          <div class={`chip chip-${chipClass(r.nivel_inherente.nombre)}`} style="margin-top:10px">{r.nivel_inherente.nombre}</div>
+          <div class="dim" style="font-size:.76rem; margin-top:8px">P {r.probabilidad} × I {r.impacto}</div>
+        </div>
+        <div class="card center">
+          <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px">Riesgo residual (Fase 4)</div>
+          <div style={`font-family:var(--font-display); font-size:3rem; font-weight:700; line-height:1; color:${r.nivel_residual.color}`}>{r.puntaje_residual}</div>
+          <div class={`chip chip-${chipClass(r.nivel_residual.nombre)}`} style="margin-top:10px">{r.nivel_residual.nombre}</div>
+          <div class="chip chip-bajo" style="margin-top:8px">Reducción {r.reduccion_pct}%</div>
+        </div>
+      </div>
+
+      {v && v.cvss_score !== null && (
+        <div class="card mt" style="border-color:rgba(76,130,247,.25)">
+          <div class="card-title">
+            <svg class="ico ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Inteligencia de amenazas · {v.cve_id}
+          </div>
+          <div class="card-sub">Datos de NVD, EPSS y CISA KEV para la vulnerabilidad asociada.</div>
+          <div class="grid grid-4">
+            <div><div class="dim" style="font-size:.72rem">CVSS 3.1</div><div class="mono" style={`font-size:1.4rem; font-weight:600; color:${v.cvss_score >= 9 ? '#d63a3a' : v.cvss_score >= 7 ? '#e8590c' : '#e0a800'}`}>{v.cvss_score}</div><div class="dim" style="font-size:.72rem">{v.cvss_severidad}</div></div>
+            <div><div class="dim" style="font-size:.72rem">EPSS (30 días)</div><div class="mono" style="font-size:1.4rem; font-weight:600">{v.epss_pct}%</div><div class="dim" style="font-size:.72rem">Prob. de explotación</div></div>
+            <div><div class="dim" style="font-size:.72rem">CISA KEV</div><div style="margin-top:6px">{v.kev ? <span class="chip chip-critico">Explotada</span> : <span class="dim">No listada</span>}</div></div>
+            <div><div class="dim" style="font-size:.72rem">VPR (prioridad)</div><div class="mono" style="font-size:1.4rem; font-weight:600; color:#d63a3a">{v.vpr}</div><div class="dim" style="font-size:.72rem">{v.vpr_nivel}</div></div>
+          </div>
+          {v.cvss_vector && <div class="mono dim mt" style="font-size:.76rem">{v.cvss_vector}</div>}
+        </div>
+      )}
+
+      <div class="card mt">
+        <div class="card-title">Plan de tratamiento <span class="dim" style="font-weight:400; font-size:.8rem">Fase 3 · ISO/IEC 27002:2022</span></div>
+        <div class="card-sub">Estrategias de respuesta y controles aplicados a este riesgo.</div>
+        {r.tratamientos && r.tratamientos.length > 0 ? (
+          <div class="table-wrap">
+            <table class="data">
+              <thead><tr><th>Estrategia</th><th>Control ISO</th><th>Descripción / Responsable</th><th>Eficacia</th><th>Estado</th></tr></thead>
+              <tbody>
+                {r.tratamientos.map((t) => (
+                  <tr>
+                    <td><span class={`tag ${['Mitigar', 'Evitar'].includes(t.estrategia) ? 'tag-brand' : ''}`}>{t.estrategia}</span></td>
+                    <td>{t.control ? <><span class="code">{t.control.codigo_iso}</span><br /><span class="dim" style="font-size:.76rem">{t.control.nombre}</span></> : <span class="dim">—</span>}</td>
+                    <td class="stack" style="gap:2px"><span>{t.descripcion}</span><span class="dim" style="font-size:.76rem">Responsable: {t.responsable || '—'}</span></td>
+                    <td class="mono">{t.eficacia}%</td>
+                    <td><span class="tag">{t.estado}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <div class="empty-state" style="padding:30px"><p>Este riesgo aún no tiene tratamiento. El riesgo residual es igual al inherente.</p></div>}
+        {r.tratamientos && r.tratamientos.length > 0 && <div class="dim mt" style="font-size:.78rem">Eficacia combinada de controles implementados: <b>{r.eficacia_total}%</b>.</div>}
+      </div>
+
+      {r.observaciones && r.observaciones.length > 0 && (
+        <div class="card mt">
+          <div class="card-title">Observaciones asociadas <span class="dim" style="font-weight:400; font-size:.8rem">Fase 5</span></div>
+          <ul class="list-plain">
+            {r.observaciones.map((o) => (
+              <li class="obs">
+                <div class="obs-meta"><span class={`tag ${o.tipo === 'Recomendación' ? 'tag-brand' : ''}`}>{o.tipo}</span> {o.autor}</div>
+                <div style="font-size:.9rem">{o.contenido}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  )}
+</Layout>

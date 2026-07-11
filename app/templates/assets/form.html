@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% set active = 'assets' %}
+{% block title %}{{ 'Nuevo activo' if es_nuevo else 'Editar activo' }} · CyberRisk 360{% endblock %}
+{% block crumb %}<a href="{{ url_for('assets.listar') }}">Activos</a> · <b>{{ 'Nuevo' if es_nuevo else 'Editar' }}</b>{% endblock %}
+
+{% macro scale(name, current) %}
+<div class="scale">
+  {% for v in range(1,6) %}
+  <input type="radio" id="{{ name }}{{ v }}" name="{{ name }}" value="{{ v }}" {{ 'checked' if current == v }}>
+  <label for="{{ name }}{{ v }}">{{ v }}</label>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block content %}
+{% set c = (activo.confidencialidad|int) if activo else 3 %}
+{% set i = (activo.integridad|int) if activo else 3 %}
+{% set d = (activo.disponibilidad|int) if activo else 3 %}
+
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 1 — Valoración de activos</div>
+    <h1>{{ 'Registrar activo' if es_nuevo else 'Editar activo' }}</h1>
+    <p>Complete la información del activo y su valoración en las tres dimensiones de seguridad.</p>
+  </div>
+</div>
+
+<form method="post" class="card" style="max-width:820px">
+  <div class="form-grid">
+    <div class="field">
+      <label>Código <span class="req">*</span></label>
+      <input class="form-control mono" name="codigo" value="{{ activo.codigo if activo else '' }}" placeholder="ACT-001" required>
+    </div>
+    <div class="field">
+      <label>Tipo de activo</label>
+      <select class="form-control" name="tipo">
+        {% for t in tipos %}<option value="{{ t }}" {{ 'selected' if activo and activo.tipo == t }}>{{ t }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field full">
+      <label>Nombre del activo <span class="req">*</span></label>
+      <input class="form-control" name="nombre" value="{{ activo.nombre if activo else '' }}" placeholder="Base de datos de clientes" required minlength="3">
+    </div>
+    <div class="field full">
+      <label>Descripción</label>
+      <textarea class="form-control" name="descripcion" placeholder="Función del activo dentro de la organización...">{{ activo.descripcion if activo else '' }}</textarea>
+    </div>
+    <div class="field">
+      <label>Propietario / responsable</label>
+      <input class="form-control" name="propietario" value="{{ activo.propietario if activo else '' }}" placeholder="Jefe de Datos">
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="card-title">Valoración CIA <span class="dim" style="font-weight:400; font-size:.8rem">(1 = Muy Bajo · 5 = Muy Alto)</span></div>
+  <div class="card-sub">Califique el impacto en caso de comprometerse cada dimensión. El valor del activo será la más alta.</div>
+
+  <div class="form-grid">
+    <div class="field">
+      <label>Confidencialidad</label>
+      {{ scale('confidencialidad', c) }}
+      <span class="hint">Impacto si la información es divulgada.</span>
+    </div>
+    <div class="field">
+      <label>Integridad</label>
+      {{ scale('integridad', i) }}
+      <span class="hint">Impacto si la información es alterada.</span>
+    </div>
+    <div class="field">
+      <label>Disponibilidad</label>
+      {{ scale('disponibilidad', d) }}
+      <span class="hint">Impacto si el activo deja de estar disponible.</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Guardar activo</button>
+    <a class="btn btn-ghost" href="{{ url_for('assets.listar') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

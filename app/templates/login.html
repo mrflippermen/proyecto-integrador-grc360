@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión · CyberRisk 360{% endblock %}
+{% block auth_content %}
+<div style="min-height:100vh; display:grid; grid-template-columns: 1.1fr .9fr;">
+  <!-- Panel de marca -->
+  <div style="background:linear-gradient(160deg,#111a2b,#0a0f1a); padding:56px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
+    <div class="brand">
+      <div class="brand-mark"><span></span></div>
+      <div class="brand-name">CyberRisk 360<small>Gestión de Riesgos</small></div>
+    </div>
+
+    <div style="position:relative; z-index:2;">
+      <div style="font-size:.72rem; text-transform:uppercase; letter-spacing:.2em; color:#34d3c0; font-weight:600; margin-bottom:16px;">Metodología GRC-360 · ISO/IEC 27002:2022</div>
+      <h1 style="font-size:2.5rem; line-height:1.1; max-width:16ch;">Del activo al riesgo residual, en un solo flujo.</h1>
+      <p class="muted" style="max-width:44ch; margin-top:16px;">Automatiza la valoración de activos, el análisis probabilidad × impacto, el tratamiento con controles ISO y el monitoreo continuo del riesgo empresarial.</p>
+
+      <!-- Mini matriz decorativa (elemento firma) -->
+      <div style="display:grid; grid-template-columns:repeat(5,26px); gap:5px; margin-top:34px;">
+        {% set colors = ['#2e9e5b','#2e9e5b','#e0a800','#e8590c','#d63a3a','#2e9e5b','#e0a800','#e0a800','#e8590c','#d63a3a','#e0a800','#e0a800','#e8590c','#d63a3a','#d63a3a','#e0a800','#e8590c','#d63a3a','#d63a3a','#d63a3a','#e8590c','#d63a3a','#d63a3a','#d63a3a','#d63a3a'] %}
+        {% for c in colors %}<div style="width:26px;height:26px;border-radius:6px;background:{{c}};opacity:.85"></div>{% endfor %}
+      </div>
+      <div class="muted" style="font-size:.74rem; margin-top:10px;">Matriz de riesgo 5×5 — Probabilidad × Impacto</div>
+    </div>
+
+    <div class="dim" style="font-size:.74rem; position:relative; z-index:2;">ITIZ3301 · Seguridad Informática · Proyecto Integrador</div>
+  </div>
+
+  <!-- Formulario -->
+  <div style="display:grid; place-items:center; padding:40px; background:var(--bg);">
+    <div style="width:100%; max-width:360px;">
+      <h2 style="font-size:1.5rem; margin-bottom:6px;">Iniciar sesión</h2>
+      <p class="muted" style="margin-bottom:24px; font-size:.9rem;">Acceda a la plataforma de gestión de riesgos.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('auth.login') }}" class="stack" style="gap:16px;">
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input class="form-control" type="email" name="email" required autofocus placeholder="analista@cyberrisk360.com">
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input class="form-control" type="password" name="password" required placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" style="justify-content:center;" type="submit">Ingresar</button>
+      </form>
+
+      <div class="card mt" style="padding:14px 16px; background:var(--bg-2);">
+        <div class="dim" style="font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px;">Cuentas de demostración</div>
+        <div class="mono" style="font-size:.78rem; line-height:1.9; color:var(--text-muted)">
+          admin@cyberrisk360.com · Admin123<br>
+          analista@cyberrisk360.com · Analista123
+        </div>
+      </div>
+      <p class="dim center mt" style="font-size:.82rem;">¿Sin cuenta? <a href="{{ url_for('auth.registro') }}">Regístrese aquí</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

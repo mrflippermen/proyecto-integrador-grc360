@@ -1,0 +1,14 @@
+# CyberRisk 360 - Dependencias del proyecto
+# Sistema de Gestión de Riesgos Cibernéticos (ITIZ3301 - Proyecto Integrador)
+
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Werkzeug==3.0.3
+SQLAlchemy==2.0.31
+
+# Inteligencia de amenazas (consultas a NVD, EPSS y CISA KEV)
+requests==2.32.3
+
+# Servidor WSGI para producción (Render, Railway, etc.)
+gunicorn==23.0.0

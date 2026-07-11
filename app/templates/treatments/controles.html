@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set active = 'treatments' %}
+{% block title %}Controles ISO 27002 · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Tratamiento</b> · Controles ISO/IEC 27002:2022{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 3 — Tratamiento del riesgo</div>
+    <h1>Catálogo de controles ISO/IEC 27002:2022</h1>
+    <p>Referencia de controles de seguridad organizados en los cuatro temas de la norma. Se aplican a los riesgos desde cada ficha de riesgo.</p>
+  </div>
+  <div class="card" style="padding:14px 18px; margin:0; text-align:center">
+    <div style="font-family:var(--font-display); font-size:1.8rem; font-weight:700">{{ total }}</div>
+    <div class="dim" style="font-size:.74rem">controles disponibles</div>
+  </div>
+</div>
+
+{% set temas = {'Organizacional':'var(--brand)','Personas':'var(--brand-2)','Físico':'var(--sev-medio)','Tecnológico':'var(--sev-alto)'} %}
+{% for tema, color in temas.items() %}
+  {% if por_tema.get(tema) %}
+  <div class="card mt">
+    <div class="card-title"><span style="width:10px;height:10px;border-radius:3px;background:{{ color }};display:inline-block"></span> {{ tema }} <span class="tag">{{ por_tema[tema]|length }}</span></div>
+    <div class="table-wrap mt" style="margin-top:12px">
+      <table class="data">
+        <thead><tr><th style="width:90px">Código</th><th>Control</th></tr></thead>
+        <tbody>
+          {% for c in por_tema[tema] %}
+          <tr><td><span class="code">{{ c.codigo_iso }}</span></td><td>{{ c.nombre }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}
+{% endblock %}

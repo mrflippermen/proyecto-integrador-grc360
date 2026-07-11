@@ -1,0 +1,87 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCatalogs, type Catalogs } from '../../lib/api';
+
+let cat: Catalogs | null = null;
+let error = '';
+try {
+  cat = await getCatalogs();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+---
+<Layout title="Nuevo riesgo · CyberRisk 360" active="risks" crumb='<a href="/riesgos">Riesgos</a> · <b>Nuevo</b>'>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Fase 2 — Identificación de riesgos</div>
+      <h1>Registrar riesgo</h1>
+      <p>Relacione activo, amenaza y vulnerabilidad, y valore la probabilidad y el impacto (1–5).</p>
+    </div>
+  </div>
+
+  {error && <div class="flash flash-danger">{error}</div>}
+  <div id="msg"></div>
+
+  {cat && (
+    <form id="form" class="card" style="max-width:860px">
+      <div class="form-grid">
+        <div class="field"><label>Código <span class="req">*</span></label><input class="form-control mono" name="codigo" placeholder="R-013" required /></div>
+        <div class="field"><label>Estado</label>
+          <select class="form-control" name="estado">{cat.estados_riesgo.map((e) => <option value={e}>{e}</option>)}</select>
+        </div>
+        <div class="field"><label>Activo afectado <span class="req">*</span></label>
+          <select class="form-control" name="asset_id" required><option value="">— Seleccione —</option>{cat.activos.map((a) => <option value={a.id}>{a.codigo} · {a.nombre}</option>)}</select>
+        </div>
+        <div class="field"><label>Amenaza <span class="req">*</span></label>
+          <select class="form-control" name="threat_id" required><option value="">— Seleccione —</option>{cat.amenazas.map((t) => <option value={t.id}>{t.nombre}</option>)}</select>
+        </div>
+        <div class="field"><label>Vulnerabilidad <span class="req">*</span></label>
+          <select class="form-control" name="vulnerability_id" required><option value="">— Seleccione —</option>{cat.vulnerabilidades.map((v) => <option value={v.id}>{v.nombre}</option>)}</select>
+        </div>
+        <div class="field full"><label>Descripción del riesgo</label><textarea class="form-control" name="descripcion" placeholder="Escenario de riesgo..."></textarea></div>
+      </div>
+
+      <hr class="divider" />
+      <div class="card-title">Valoración del riesgo inherente</div>
+      <div class="card-sub">Puntaje = Probabilidad × Impacto (rango 1–25).</div>
+      <div class="form-grid">
+        <div class="field"><label>Probabilidad de ocurrencia</label>
+          <div class="scale">{[1, 2, 3, 4, 5].map((n) => (<><input type="radio" id={`p${n}`} name="probabilidad" value={n} checked={n === 3} /><label for={`p${n}`}>{n}</label></>))}</div>
+          <span class="hint">1 = Rara · 5 = Casi segura</span>
+        </div>
+        <div class="field"><label>Impacto</label>
+          <div class="scale">{[1, 2, 3, 4, 5].map((n) => (<><input type="radio" id={`i${n}`} name="impacto" value={n} checked={n === 3} /><label for={`i${n}`}>{n}</label></>))}</div>
+          <span class="hint">1 = Insignificante · 5 = Catastrófico</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Guardar riesgo</button>
+        <a class="btn btn-ghost" href="/riesgos">Cancelar</a>
+      </div>
+    </form>
+  )}
+</Layout>
+
+<script>
+  import { API_URL } from '../../lib/api';
+  const form = document.getElementById('form') as HTMLFormElement | null;
+  const msg = document.getElementById('msg');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const body: Record<string, unknown> = { usuario: 'Analista (frontend)' };
+    fd.forEach((v, k) => (body[k] = v));
+    const res = await fetch(`${API_URL}/risks`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      if (msg) msg.innerHTML = '<div class="flash flash-success">Riesgo creado. Redirigiendo…</div>';
+      setTimeout(() => (location.href = `/riesgos/${data.risk.id}`), 900);
+    } else {
+      const errs = (data.errores || [data.error]).filter(Boolean).join(' ');
+      if (msg) msg.innerHTML = `<div class="flash flash-danger">${errs || 'No se pudo crear el riesgo.'}</div>`;
+    }
+  });
+</script>

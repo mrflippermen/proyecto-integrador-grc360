@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% set active = 'risks' %}
+{% block title %}{{ 'Nuevo riesgo' if es_nuevo else 'Editar riesgo' }} · CyberRisk 360{% endblock %}
+{% block crumb %}<a href="{{ url_for('risks.listar') }}">Riesgos</a> · <b>{{ 'Nuevo' if es_nuevo else 'Editar' }}</b>{% endblock %}
+
+{% macro scale(name, current) %}
+<div class="scale">
+  {% for v in range(1,6) %}
+  <input type="radio" id="{{ name }}{{ v }}" name="{{ name }}" value="{{ v }}" {{ 'checked' if current == v }}>
+  <label for="{{ name }}{{ v }}">{{ v }}</label>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block content %}
+{% set prob = (riesgo.probabilidad|int) if riesgo else 3 %}
+{% set imp = (riesgo.impacto|int) if riesgo else 3 %}
+
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 2 — Identificación de riesgos</div>
+    <h1>{{ 'Registrar riesgo' if es_nuevo else 'Editar riesgo' }}</h1>
+    <p>Relacione activo, amenaza y vulnerabilidad, y valore la probabilidad y el impacto (1–5).</p>
+  </div>
+</div>
+
+<form method="post" class="card" style="max-width:860px">
+  <div class="form-grid">
+    <div class="field">
+      <label>Código <span class="req">*</span></label>
+      <input class="form-control mono" name="codigo" value="{{ riesgo.codigo if riesgo else '' }}" placeholder="R-001" required>
+    </div>
+    <div class="field">
+      <label>Estado</label>
+      <select class="form-control" name="estado">
+        {% for e in estados %}<option value="{{ e }}" {{ 'selected' if riesgo and riesgo.estado == e }}>{{ e }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Activo afectado <span class="req">*</span></label>
+      <select class="form-control" name="asset_id" required>
+        <option value="">— Seleccione —</option>
+        {% for a in activos %}<option value="{{ a.id }}" {{ 'selected' if riesgo and riesgo.asset_id|int == a.id }}>{{ a.codigo }} · {{ a.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Amenaza <span class="req">*</span></label>
+      <select class="form-control" name="threat_id" required>
+        <option value="">— Seleccione —</option>
+        {% for t in amenazas %}<option value="{{ t.id }}" {{ 'selected' if riesgo and riesgo.threat_id|int == t.id }}>{{ t.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>Vulnerabilidad <span class="req">*</span></label>
+      <select class="form-control" name="vulnerability_id" required>
+        <option value="">— Seleccione —</option>
+        {% for v in vulnerabilidades %}<option value="{{ v.id }}" {{ 'selected' if riesgo and riesgo.vulnerability_id|int == v.id }}>{{ v.nombre }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field full">
+      <label>Descripción del riesgo</label>
+      <textarea class="form-control" name="descripcion" placeholder="Escenario de riesgo...">{{ riesgo.descripcion if riesgo else '' }}</textarea>
+    </div>
+    <div class="field full">
+      <label>Controles existentes</label>
+      <textarea class="form-control" name="controles_existentes" placeholder="Controles ya implementados que reducen este riesgo...">{{ riesgo.controles_existentes if riesgo else '' }}</textarea>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="card-title">Valoración del riesgo inherente</div>
+  <div class="card-sub">Nivel de riesgo antes de aplicar nuevos controles. Puntaje = Probabilidad × Impacto (rango 1–25).</div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Probabilidad de ocurrencia</label>
+      {{ scale('probabilidad', prob) }}
+      <span class="hint">1 = Rara · 5 = Casi segura</span>
+    </div>
+    <div class="field">
+      <label>Impacto</label>
+      {{ scale('impacto', imp) }}
+      <span class="hint">1 = Insignificante · 5 = Catastrófico</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Guardar riesgo</button>
+    <a class="btn btn-ghost" href="{{ url_for('risks.listar') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberRisk 360 — Presentación Ejecutiva</title>
+<style>
+:root{
+  --bg:#0e131f; --bg-2:#121a29; --surface:#182233; --surface-2:#1e2a3e;
+  --border:#29354b; --border-soft:#212c40;
+  --text:#e8edf5; --muted:#93a1b8; --dim:#64748b;
+  --brand:#4c82f7; --brand-2:#34d3c0;
+  --bajo:#2e9e5b; --medio:#e0a800; --alto:#e8590c; --critico:#d63a3a;
+  --fs:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--fs);overflow:hidden;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono)}
+
+/* Progreso */
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--brand-2));z-index:100;transition:width .3s;box-shadow:0 0 12px rgba(76,130,247,.6)}
+
+/* Deck */
+.slide{position:fixed;inset:0;display:none;flex-direction:column;padding:64px 84px 56px;opacity:0;transition:opacity .35s ease}
+.slide.active{display:flex;opacity:1}
+.slide-body{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1120px;width:100%;margin:0 auto}
+.eyebrow{font-size:.8rem;text-transform:uppercase;letter-spacing:.2em;color:var(--brand-2);font-weight:700;margin-bottom:18px}
+h1{font-size:3.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:balance}
+h2{font-size:2.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.05;margin-bottom:10px;text-wrap:balance}
+.lead{font-size:1.35rem;color:var(--muted);line-height:1.5;max-width:60ch;margin-top:14px}
+.foot{position:absolute;bottom:26px;left:84px;right:84px;display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--dim)}
+.foot .brand{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--muted)}
+.mark{width:26px;height:26px;border-radius:7px;background:conic-gradient(from 140deg,var(--bajo),var(--medio),var(--alto),var(--critico),var(--bajo))}
+
+/* Portada */
+.cover{align-items:flex-start;justify-content:center}
+.cover .bigmark{width:76px;height:76px;border-radius:18px;background:conic-gradient(from 140deg,var(--bajo),var(--medio),var(--alto),var(--critico),var(--bajo));display:grid;place-items:center;margin-bottom:30px;box-shadow:0 12px 50px rgba(0,0,0,.5)}
+.cover .bigmark span{width:28px;height:28px;border-radius:8px;background:var(--bg)}
+.cover h1{font-size:4.6rem}
+.grad{background:linear-gradient(100deg,var(--brand),var(--brand-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{display:inline-flex;align-items:center;gap:8px;background:rgba(76,130,247,.12);border:1px solid rgba(76,130,247,.3);color:#a9c4fb;border-radius:999px;padding:8px 16px;font-size:.9rem;font-weight:600;margin-top:26px}
+.pill.mono{font-family:var(--mono);font-size:.82rem}
+
+/* Bullets */
+ul.b{list-style:none;margin-top:22px;display:flex;flex-direction:column;gap:16px}
+ul.b li{display:flex;gap:14px;font-size:1.28rem;line-height:1.4;align-items:flex-start}
+ul.b li::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--brand);margin-top:9px;flex-shrink:0}
+ul.b li b{color:#fff}
+.muted{color:var(--muted)} .dim{color:var(--dim)}
+
+/* Grids / cards */
+.grid{display:grid;gap:16px;margin-top:26px}
+.g3{grid-template-columns:repeat(3,1fr)} .g6{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:1fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:22px}
+.card .n{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--brand);border:1px solid var(--border);border-radius:7px;width:30px;height:30px;display:grid;place-items:center;margin-bottom:12px}
+.card h3{font-size:1.12rem;font-weight:700;margin-bottom:6px}
+.card p{font-size:.95rem;color:var(--muted);line-height:1.45}
+.stat{font-family:var(--fs);font-size:3.2rem;font-weight:800;line-height:1;letter-spacing:-.02em}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.chip{font-size:.86rem;font-weight:600;padding:6px 13px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border-soft);color:var(--muted)}
+.chip.on{background:rgba(76,130,247,.14);border-color:rgba(76,130,247,.3);color:#a9c4fb}
+.sev{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle}
+
+/* Flujo / arquitectura */
+.flow{display:flex;align-items:stretch;gap:12px;margin-top:30px;flex-wrap:wrap}
+.flow .step{flex:1;min-width:150px;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:18px 16px;position:relative}
+.flow .step .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--brand-2);font-weight:700;margin-bottom:8px}
+.flow .step .t{font-weight:700;font-size:1.02rem}
+.flow .step .d{font-size:.84rem;color:var(--muted);margin-top:5px;line-height:1.35}
+.arrow{align-self:center;color:var(--dim);font-size:1.4rem;flex:0 0 auto}
+.layer{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px}
+.layer .lk{font-family:var(--mono);font-size:.74rem;color:var(--brand-2);width:120px;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em}
+.layer .lt{font-size:1rem}
+.layer .lt b{color:#fff}
+
+/* Matriz mini */
+.mtx{display:grid;grid-template-columns:repeat(5,44px);grid-auto-rows:44px;gap:5px;margin-top:8px}
+.mtx div{border-radius:7px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:.9rem;color:rgba(255,255,255,.92)}
+
+/* Nav hint */
+.navhint{position:fixed;bottom:24px;right:28px;font-size:.72rem;color:var(--dim);z-index:60}
+.dots{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:60}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:background .2s,transform .2s}
+.dot.on{background:var(--brand);transform:scale(1.3)}
+.big{font-size:1.9rem;font-weight:800;color:var(--brand-2)}
+a{color:var(--brand-2)}
+
+@media print{
+  body{overflow:visible;height:auto}
+  .slide{position:relative;display:flex;opacity:1;page-break-after:always;height:100vh;inset:auto}
+  #progress,.navhint,.dots{display:none}
+}
+@media(max-width:820px){
+  .slide{padding:40px 28px}
+  h1{font-size:2.6rem}.cover h1{font-size:3rem}h2{font-size:1.9rem}
+  .g3,.g6,.g2{grid-template-columns:1fr}.foot{left:28px;right:28px}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<!-- 1. Portada -->
+<section class="slide cover active">
+  <div class="slide-body">
+    <div class="bigmark"><span></span></div>
+    <div class="eyebrow">Seguridad Informática · ITIZ3301 · Proyecto Integrador</div>
+    <h1>CyberRisk&nbsp;<span class="grad">360</span></h1>
+    <p class="lead">Automatización de la gestión de riesgos cibernéticos con la metodología <b style="color:#fff">GRC-360</b>, inteligencia de amenazas real y cumplimiento internacional.</p>
+    <span class="pill mono">https://mrflippermen.github.io/proyecto-integrador-grc360/</span>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Integrantes del grupo · Presentación ejecutiva</div></div>
+</section>
+
+<!-- 2. Problema -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">El contexto</div>
+    <h2>Gestionar el riesgo cibernético es difícil… y caro</h2>
+    <div class="grid g3" style="margin-top:30px">
+      <div class="card"><div class="stat" style="color:var(--critico)">USD&nbsp;4.8M</div><p style="margin-top:10px">Costo promedio global de una brecha de datos. La mayoría de PYMES no puede absorberlo.</p></div>
+      <div class="card"><div class="stat" style="color:var(--alto)">Hojas<br>de cálculo</div><p style="margin-top:10px">Así gestionan el riesgo muchas organizaciones: sin trazabilidad, sin priorización y sin actualización.</p></div>
+      <div class="card"><div class="stat" style="color:var(--medio)">¿Qué<br>primero?</div><p style="margin-top:10px">Sin inteligencia de amenazas, no se sabe qué vulnerabilidad se está explotando <i>ahora</i> en el mundo real.</p></div>
+    </div>
+    <p class="lead" style="margin-top:26px;font-size:1.15rem">Impacto <b style="color:#fff">económico, social y global</b>: detrás de cada activo hay datos de personas que dependen de decisiones muchas veces invisibles.</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>El problema</div></div>
+</section>
+
+<!-- 3. Metodología GRC-360 -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Nuestra propuesta metodológica</div>
+    <h2>Metodología GRC-360</h2>
+    <p class="lead" style="font-size:1.12rem">Un ciclo de seis fases, automatizable y trazable, alineado con estándares internacionales.</p>
+    <div class="grid g6" style="margin-top:24px">
+      <div class="card"><div class="n">1</div><h3>Valoración de activos</h3><p>Clasificación y valoración CIA (1–5).</p></div>
+      <div class="card"><div class="n">2</div><h3>Identificación de riesgos</h3><p>Amenaza + vulnerabilidad · Probabilidad × Impacto.</p></div>
+      <div class="card"><div class="n">3</div><h3>Tratamiento</h3><p>Estrategias y controles ISO/IEC 27002:2022.</p></div>
+      <div class="card"><div class="n">4</div><h3>Riesgo residual</h3><p>Recalculo automático tras los controles.</p></div>
+      <div class="card"><div class="n">5</div><h3>Comunicación</h3><p>Observaciones e informes ejecutivos.</p></div>
+      <div class="card"><div class="n">6</div><h3>Monitoreo</h3><p>Panel, indicadores y tendencia.</p></div>
+    </div>
+    <div class="chips"><span class="chip on">ISO/IEC 27001</span><span class="chip on">27002:2022</span><span class="chip on">27005</span><span class="chip on">ISO 31000</span><span class="chip on">NIST CSF 2.0</span><span class="chip on">CVSS v3.1</span><span class="chip on">MITRE ATT&CK</span></div>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Metodología</div></div>
+</section>
+
+<!-- 4. Arquitectura -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Cómo está construido</div>
+    <h2>Arquitectura del sistema</h2>
+    <div style="margin-top:26px">
+      <div class="layer"><div class="lk">Frontend</div><div class="lt"><b>Astro</b> (SSR) + <b>SCSS</b> + <b>TypeScript</b> · gráficos con Chart.js · también app cliente estática en GitHub Pages</div></div>
+      <div class="arrow" style="text-align:center;margin:2px 0">↓ &nbsp;HTTP / JSON</div>
+      <div class="layer"><div class="lk">Backend / API</div><div class="lt"><b>Flask</b> (API REST) · lógica GRC-360: CVSS 3.1, riesgo residual, VPR, Cyber Exposure Score, SLA</div></div>
+      <div class="arrow" style="text-align:center;margin:2px 0">↓</div>
+      <div class="grid g2" style="margin-top:0">
+        <div class="layer" style="margin:0"><div class="lk">Datos</div><div class="lt"><b>SQLite</b> · SQLAlchemy (ORM)</div></div>
+        <div class="layer" style="margin:0"><div class="lk">Inteligencia</div><div class="lt"><b>NVD · EPSS · CISA KEV</b> (APIs en vivo)</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Arquitectura</div></div>
+</section>
+
+<!-- 5. Fases 1-2 -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Fases 1 y 2</div>
+    <h2>De los activos a la matriz de riesgo</h2>
+    <div class="grid g2" style="margin-top:24px;align-items:start">
+      <div>
+        <ul class="b">
+          <li><b>Valoración CIA:</b> cada activo se califica 1–5 en Confidencialidad, Integridad y Disponibilidad. El valor es la dimensión más crítica.</li>
+          <li><b>Riesgo = Activo + Amenaza + Vulnerabilidad.</b></li>
+          <li><b>Riesgo inherente = Probabilidad × Impacto</b> (rango 1–25).</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="dim" style="font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px">Matriz de riesgo 5×5</div>
+        <div class="mtx" id="mtx"></div>
+        <div style="margin-top:14px;font-size:.82rem;color:var(--muted)">
+          <span class="sev" style="background:var(--bajo)"></span> Bajo &nbsp; <span class="sev" style="background:var(--medio)"></span> Medio &nbsp; <span class="sev" style="background:var(--alto)"></span> Alto &nbsp; <span class="sev" style="background:var(--critico)"></span> Crítico
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Valoración e identificación</div></div>
+</section>
+
+<!-- 6. Fases 3-4 -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Fases 3 y 4</div>
+    <h2>Tratamiento y riesgo residual automático</h2>
+    <div class="chips" style="margin-top:22px">
+      <span class="chip on">Mitigar</span><span class="chip on">Transferir</span><span class="chip on">Aceptar</span><span class="chip on">Evitar</span>
+    </div>
+    <ul class="b" style="margin-top:24px">
+      <li>Cada tratamiento se asocia a un control <b>ISO/IEC 27002:2022</b>, un responsable y una eficacia estimada.</li>
+      <li><b>Riesgo residual = Inherente × (1 − eficacia de los controles)</b>, combinada de forma multiplicativa (rendimientos decrecientes).</li>
+      <li>Solo los controles <b>implementados</b> reducen el riesgo — y <b>nunca llega a cero</b> (máximo 90 % de reducción).</li>
+      <li>El residual, el VPR y el Cyber Exposure Score se <b>recalculan solos</b> con cada cambio.</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Tratamiento y residual</div></div>
+</section>
+
+<!-- 7. CTI -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Inteligencia de amenazas</div>
+    <h2>Priorizar por la amenaza real, no solo la teórica</h2>
+    <div class="grid g3" style="margin-top:28px">
+      <div class="card"><h3 style="color:var(--brand-2)">CVSS 3.1</h3><p>Severidad técnica oficial (NVD / FIRST.org).</p></div>
+      <div class="card"><h3 style="color:var(--medio)">EPSS</h3><p>Probabilidad de explotación en los próximos 30 días.</p></div>
+      <div class="card"><h3 style="color:var(--critico)">CISA KEV</h3><p>¿Se está explotando <i>activamente</i> en el mundo real?</p></div>
+    </div>
+    <div class="card" style="margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+      <div><div style="font-weight:700;font-size:1.15rem">VPR — Vulnerability Priority Rating</div><p style="color:var(--muted)">Combina CVSS + EPSS + KEV en una sola prioridad 0–10, al estilo Tenable.</p></div>
+      <div style="text-align:right"><div class="dim" style="font-size:.8rem">Ej. Log4Shell (CVE-2021-44228)</div><div class="big">VPR 10 · Crítica</div></div>
+    </div>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Threat Intelligence</div></div>
+</section>
+
+<!-- 8. Automatización -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Diferenciador clave</div>
+    <h2>Valoración y mitigación <span class="grad">automáticas</span></h2>
+    <div class="grid g2" style="margin-top:26px">
+      <div class="card"><h3>Valoración automática</h3><p style="margin-top:8px">Al elegir activo + amenaza + vulnerabilidad, el sistema calcula solo la <b style="color:#fff">probabilidad</b> (desde EPSS/KEV) y el <b style="color:#fff">impacto</b> (criticidad del activo + CVSS).</p></div>
+      <div class="card"><h3>Mitigación automática</h3><p style="margin-top:8px">Un motor de reglas <b style="color:#fff">recomienda los controles ISO 27002</b> adecuados, proyecta el riesgo residual y los aplica con un clic — individual o masivo.</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px;font-size:1.15rem">El analista decide; el sistema hace los cálculos y propone. La responsabilidad profesional no se automatiza: todo queda en la bitácora de auditoría.</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Automatización</div></div>
+</section>
+
+<!-- 9. Cumplimiento -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Cumplimiento</div>
+    <h2>Alineado a marcos internacionales</h2>
+    <div class="grid g2" style="margin-top:26px">
+      <div class="card"><h3>ISO/IEC 27001 · 27002:2022</h3><p style="margin-top:8px">Cobertura del programa frente a los 93 controles del Anexo A, agrupados por tema (Organizacional, Personas, Físico, Tecnológico).</p></div>
+      <div class="card"><h3>NIST CSF 2.0</h3><p style="margin-top:8px">Distribución de controles en las 6 funciones: Gobernar, Identificar, Proteger, Detectar, Responder, Recuperar — revelando dónde reforzar.</p></div>
+    </div>
+    <div class="chips"><span class="chip">Govern</span><span class="chip">Identify</span><span class="chip">Protect</span><span class="chip">Detect</span><span class="chip">Respond</span><span class="chip">Recover</span></div>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Cumplimiento</div></div>
+</section>
+
+<!-- 10. Monitoreo -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Fase 6</div>
+    <h2>Panel de monitoreo</h2>
+    <div class="grid g3" style="margin-top:28px">
+      <div class="card"><div class="dim" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.1em">Cyber Exposure Score</div><div class="stat" style="color:var(--medio);margin-top:8px">423<span style="font-size:1rem;color:var(--dim)"> / 1000</span></div><p style="margin-top:8px">Exposición agregada de la organización.</p></div>
+      <div class="card"><div class="dim" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.1em">Apetito de riesgo</div><div class="stat" style="color:var(--critico);margin-top:8px">6</div><p style="margin-top:8px">Riesgos que exceden el umbral tolerado.</p></div>
+      <div class="card"><div class="dim" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.1em">SLA de remediación</div><div class="stat" style="color:var(--alto);margin-top:8px">6</div><p style="margin-top:8px">Riesgos fuera de su ventana de tratamiento.</p></div>
+    </div>
+    <p class="lead" style="margin-top:22px;font-size:1.12rem">Más matriz de calor 5×5, distribución inherente vs. residual y tendencia de exposición histórica.</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Monitoreo</div></div>
+</section>
+
+<!-- 11. Flujo de trabajo -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Flujo de trabajo de la herramienta</div>
+    <h2>De un archivo Excel a decisiones informadas</h2>
+    <div class="flow">
+      <div class="step"><div class="k">1 · Cargar</div><div class="t">Importar</div><div class="d">Activos y riesgos desde Excel/CSV, o registrarlos en la app.</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">2 · Valorar</div><div class="t">Auto P × I</div><div class="d">El sistema sugiere probabilidad e impacto.</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">3 · Tratar</div><div class="t">Mitigación</div><div class="d">Controles ISO recomendados y aplicados.</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="k">4 · Monitorear</div><div class="t">Panel</div><div class="d">Residual, exposición y cumplimiento en vivo.</div></div>
+    </div>
+    <p class="lead" style="margin-top:30px;font-size:1.12rem">Todo el ciclo GRC-360 en un solo flujo, intuitivo y sin instalar nada.</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Flujo de trabajo</div></div>
+</section>
+
+<!-- 12. Ética / RC4 -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Responsabilidad ética y profesional · RC4</div>
+    <h2>La decisión de diseño más importante es <span class="grad">ética</span></h2>
+    <ul class="b" style="margin-top:22px">
+      <li><b>Honestidad sobre los límites:</b> el riesgo residual nunca es cero y un tablero en verde no significa “estar seguro”.</li>
+      <li><b>Rendición de cuentas:</b> la automatización no exime al profesional — todo queda trazado en la bitácora de auditoría.</li>
+      <li><b>Impacto en las personas:</b> proteger datos es un acto de respeto, no un mero requisito de cumplimiento.</li>
+      <li><b>Conocimiento de doble uso:</b> la inteligencia de amenazas se usa con una finalidad exclusivamente defensiva.</li>
+    </ul>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Ética profesional</div></div>
+</section>
+
+<!-- 13. Demo -->
+<section class="slide cover">
+  <div class="slide-body">
+    <div class="eyebrow">Demostración en vivo</div>
+    <h1 style="font-size:3.4rem">Pruébelo ahora<br>— <span class="grad">sin instalar nada</span></h1>
+    <span class="pill mono" style="font-size:1rem;margin-top:30px">https://mrflippermen.github.io/proyecto-integrador-grc360/</span>
+    <p class="lead" style="margin-top:22px">Abra el enlace en cualquier navegador. Caso de ejemplo ya cargado · carga de Excel · inteligencia de amenazas · mitigación automática.</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>Demo</div></div>
+</section>
+
+<!-- 14. Cierre -->
+<section class="slide">
+  <div class="slide-body">
+    <div class="eyebrow">Conclusiones</div>
+    <h2>Tecnología de seguridad potente… y responsable</h2>
+    <ul class="b" style="margin-top:22px">
+      <li>Automatizamos <b>íntegramente</b> la metodología GRC-360, de la valoración al monitoreo continuo.</li>
+      <li>Alcanzamos <b>estándares internacionales</b> (ISO, NIST, CVSS, MITRE) con inteligencia de amenazas real.</li>
+      <li>La <b>valoración y la mitigación se calculan automáticamente</b>, ayudando a decidir mejor y más rápido.</li>
+    </ul>
+    <p class="lead" style="margin-top:26px;font-size:1.3rem;color:#fff">Gracias. ¿Preguntas?</p>
+  </div>
+  <div class="foot"><div class="brand"><div class="mark"></div> CyberRisk 360</div><div>ITIZ3301 · Proyecto Integrador</div></div>
+</section>
+
+<div class="dots" id="dots"></div>
+<div class="navhint">← → · espacio · F pantalla completa</div>
+
+<script>
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, dots=document.getElementById('dots'), prog=document.getElementById('progress');
+  slides.forEach(function(_,idx){ var d=document.createElement('div'); d.className='dot'; d.onclick=function(){go(idx);}; dots.appendChild(d); });
+  var dotEls=[].slice.call(document.querySelectorAll('.dot'));
+  function go(n){ i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,idx){ s.classList.toggle('active', idx===i); });
+    dotEls.forEach(function(d,idx){ d.classList.toggle('on', idx===i); });
+    prog.style.width=((i+1)/slides.length*100)+'%';
+  }
+  function next(){ go(i+1); } function prev(){ go(i-1); }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ go(0); } else if(e.key==='End'){ go(slides.length-1); }
+    else if(e.key==='f'||e.key==='F'){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  // Clic: mitad derecha avanza, izquierda retrocede
+  document.addEventListener('click',function(e){ if(e.target.closest('.dot')||e.target.closest('a'))return; if(e.clientX>window.innerWidth*0.5)next(); else prev(); });
+  // Matriz mini
+  var mtx=document.getElementById('mtx');
+  if(mtx){ for(var f=0;f<5;f++){ for(var c=0;c<5;c++){ var imp=5-f,prob=c+1,s=imp*prob,col=s<=4?'#2e9e5b':s<=9?'#e0a800':s<=14?'#e8590c':'#d63a3a'; var d=document.createElement('div'); d.style.background=col; d.style.opacity=.9; d.textContent=s; mtx.appendChild(d); } } }
+  window.addEventListener('hashchange',function(){ var n=parseInt(location.hash.slice(1)); if(n)go(n-1); });
+  var hs=parseInt(location.hash.slice(1)); go(hs?hs-1:0);
+</script>
+</body>
+</html>

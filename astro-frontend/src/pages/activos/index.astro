@@ -1,0 +1,54 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAssets, chipClass, type Activo } from '../../lib/api';
+
+let activos: Activo[] = [];
+let error = '';
+try {
+  activos = await getAssets();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+function valorNivel(v: number): string {
+  const p = v * 5;
+  if (p <= 4) return 'bajo';
+  if (p <= 9) return 'medio';
+  if (p <= 14) return 'alto';
+  return 'critico';
+}
+---
+<Layout title="Activos · CyberRisk 360" active="assets" crumb="<b>Valoración de activos</b> · Fase 1">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Fase 1 — Valoración de activos</div>
+      <h1>Inventario de activos de información</h1>
+      <p>Registro y clasificación de activos con valoración CIA (Confidencialidad, Integridad, Disponibilidad) en escala 1–5. El valor del activo es la dimensión más crítica.</p>
+    </div>
+    <a class="btn btn-primary" href="/riesgos/nuevo">+ Nuevo riesgo</a>
+  </div>
+
+  {error && <div class="flash flash-danger">{error}</div>}
+
+  {activos.length > 0 && (
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Código</th><th>Activo</th><th>Tipo</th><th>Propietario</th><th class="center">C</th><th class="center">I</th><th class="center">D</th><th>Valor</th><th>Riesgos</th></tr></thead>
+        <tbody>
+          {activos.map((a) => (
+            <tr>
+              <td><span class="code">{a.codigo}</span></td>
+              <td class="stack" style="gap:2px"><b>{a.nombre}</b><span class="dim" style="font-size:.78rem">{a.descripcion}</span></td>
+              <td><span class="tag">{a.tipo}</span></td>
+              <td class="muted">{a.propietario || '—'}</td>
+              <td class="center mono">{a.confidencialidad}</td>
+              <td class="center mono">{a.integridad}</td>
+              <td class="center mono">{a.disponibilidad}</td>
+              <td><span class={`chip chip-${valorNivel(a.valor)}`}>{a.valor} · {a.valor_texto}</span></td>
+              <td class="center mono">{a.n_riesgos}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</Layout>

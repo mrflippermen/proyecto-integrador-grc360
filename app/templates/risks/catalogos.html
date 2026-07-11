@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% set active = 'catalogos' %}
+{% block title %}Catálogos · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Catálogos</b> · Amenazas y vulnerabilidades{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Apoyo a la Fase 2</div>
+    <h1>Catálogos de amenazas y vulnerabilidades</h1>
+    <p>Base de conocimiento reutilizable para construir riesgos. Alineado con ISO/IEC 27005.</p>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <!-- Amenazas -->
+  <div class="card">
+    <div class="card-title">Amenazas <span class="tag">{{ amenazas|length }}</span></div>
+    <div class="card-sub">Eventos potenciales que pueden causar daño a un activo.</div>
+    <form method="post" class="row" style="gap:8px; margin-bottom:16px; align-items:flex-end">
+      <input type="hidden" name="tipo" value="amenaza">
+      <div class="field" style="flex:2"><label>Nombre</label><input class="form-control" name="nombre" required placeholder="Nueva amenaza"></div>
+      <div class="field" style="flex:1.2"><label>Categoría</label><input class="form-control" name="categoria" placeholder="Malware"></div>
+      <button class="btn btn-primary" type="submit">+</button>
+    </form>
+    <ul class="list-plain">
+      {% for t in amenazas %}
+      <li class="obs" style="padding:10px 0">
+        <div class="row between"><b>{{ t.nombre }}</b>
+          <div class="row" style="gap:6px">{% if t.attack_id %}<span class="tag tag-brand">ATT&CK {{ t.attack_id }}</span>{% endif %}<span class="tag">{{ t.categoria or '—' }}</span></div>
+        </div>
+        {% if t.attack_tactica %}<div class="dim" style="font-size:.74rem; margin-top:3px">Táctica MITRE: {{ t.attack_tactica }}</div>{% endif %}
+        {% if t.descripcion %}<div class="dim" style="font-size:.8rem; margin-top:3px">{{ t.descripcion }}</div>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Vulnerabilidades -->
+  <div class="card">
+    <div class="card-title">Vulnerabilidades <span class="tag">{{ vulnerabilidades|length }}</span></div>
+    <div class="card-sub">Debilidades que una amenaza puede explotar.</div>
+    <form method="post" class="row" style="gap:8px; margin-bottom:16px; align-items:flex-end">
+      <input type="hidden" name="tipo" value="vulnerabilidad">
+      <div class="field" style="flex:2"><label>Nombre</label><input class="form-control" name="nombre" required placeholder="Nueva vulnerabilidad"></div>
+      <div class="field" style="flex:1.2"><label>Categoría</label><input class="form-control" name="categoria" placeholder="Autenticación"></div>
+      <button class="btn btn-primary" type="submit">+</button>
+    </form>
+    <ul class="list-plain">
+      {% for v in vulnerabilidades %}
+      <li class="obs" style="padding:10px 0">
+        <div class="row between"><b>{{ v.nombre }}</b>
+          <div class="row" style="gap:6px">
+            {% if v.cve_id %}<span class="tag tag-brand">{{ v.cve_id }}</span>{% endif %}
+            {% if v.cvss_score is not none %}<span class="chip chip-{{ 'critico' if v.cvss_score>=9 else ('alto' if v.cvss_score>=7 else ('medio' if v.cvss_score>=4 else 'bajo')) }}">CVSS {{ v.cvss_score }}</span>{% endif %}
+            <span class="tag">{{ v.categoria or '—' }}</span>
+          </div>
+        </div>
+        {% if v.descripcion %}<div class="dim" style="font-size:.8rem; margin-top:3px">{{ v.descripcion|truncate(120) }}</div>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="dim mt" style="font-size:.78rem">Enriquezca vulnerabilidades con CVE reales en el módulo de <a href="{{ url_for('intel.index') }}">Inteligencia de amenazas</a>.</div>
+  </div>
+</div>
+{% endblock %}

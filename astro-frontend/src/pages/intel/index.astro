@@ -1,0 +1,121 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getIntel, API_URL, type IntelData } from '../../lib/api';
+
+let data: IntelData | null = null;
+let error = '';
+try {
+  data = await getIntel();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+
+function cvssClass(s: number): string {
+  if (s >= 9) return 'critico';
+  if (s >= 7) return 'alto';
+  if (s >= 4) return 'medio';
+  return 'bajo';
+}
+function vprClass(nivel: string | null): string {
+  const n = (nivel || '').toLowerCase();
+  if (n === 'crítica') return 'critico';
+  if (n === 'alta') return 'alto';
+  if (n === 'media') return 'medio';
+  return 'bajo';
+}
+---
+<Layout title="Inteligencia de amenazas · CyberRisk 360" active="intel" crumb="<b>Inteligencia de amenazas</b> · CTI">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Cyber Threat Intelligence · ISO/IEC 27002:2022 — 5.7</div>
+      <h1>Inteligencia de amenazas</h1>
+      <p>Enriquecimiento de vulnerabilidades con fuentes públicas reales: <b>NVD</b> (CVSS 3.1), <b>EPSS</b> (probabilidad de explotación) y <b>CISA KEV</b> (explotación activa). El <b>VPR</b> prioriza combinando severidad técnica y amenaza real.</p>
+    </div>
+  </div>
+
+  {error && <div class="flash flash-danger">{error}</div>}
+
+  {data && (
+    <>
+      <div class="grid grid-4">
+        <div class="kpi"><div class="k-label">Vulnerabilidades enriquecidas</div><div class="k-value">{data.kpis.enriquecidas}</div><div class="k-foot">de {data.kpis.total} en catálogo</div></div>
+        <div class="kpi r"><div class="k-label">En CISA KEV</div><div class="k-value">{data.kpis.kev}</div><div class="k-foot">Explotadas activamente</div></div>
+        <div class="kpi a"><div class="k-label">VPR crítico (≥ 9)</div><div class="k-value">{data.kpis.vpr_critico}</div><div class="k-foot">Prioridad máxima de remediación</div></div>
+        <div class="kpi"><div class="k-label">EPSS alto (≥ 50%)</div><div class="k-value">{data.kpis.epss_alto}</div><div class="k-foot">Alta probabilidad de explotación</div></div>
+      </div>
+
+      <div class="card mt" style="background:var(--bg-2); padding:14px 18px">
+        <div class="dim" style="font-size:.8rem"><b>VPR (Vulnerability Priority Rating):</b> prioridad 0–10 = CVSS + hasta +2 por EPSS; si la vulnerabilidad está en CISA KEV se eleva a un piso de 9.0. Enfoque transparente inspirado en Tenable VPR.</div>
+      </div>
+
+      <div class="card mt">
+        <div class="card-title">Vulnerabilidades priorizadas por VPR</div>
+        <div class="card-sub">Ordenadas de mayor a menor prioridad de remediación. El enriquecimiento consulta NVD, EPSS y CISA KEV en tiempo real.</div>
+        <div id="msg"></div>
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>Vulnerabilidad</th><th>CVE</th><th>CVSS</th><th>EPSS</th><th>KEV</th><th>VPR</th><th>Enriquecer (API en vivo)</th></tr></thead>
+            <tbody>
+              {data.vulnerabilidades.map((v) => (
+                <tr id={`row-${v.id}`}>
+                  <td class="stack" style="gap:2px"><b>{v.nombre}</b><span class="dim" style="font-size:.76rem">{v.categoria}</span></td>
+                  <td>{v.cve_id ? <span class="code">{v.cve_id}</span> : <span class="dim">—</span>}</td>
+                  <td>{v.cvss_score !== null ? <span class={`chip chip-${cvssClass(v.cvss_score)}`}>{v.cvss_score}</span> : <span class="dim">—</span>}</td>
+                  <td>{v.epss_pct !== null ? <span class="mono">{v.epss_pct}%</span> : <span class="dim">—</span>}</td>
+                  <td>{v.kev ? <span class="chip chip-critico">KEV</span> : <span class="dim">no</span>}</td>
+                  <td>{v.vpr !== null ? <span class={`chip chip-${vprClass(v.vpr_nivel)}`}>{v.vpr} · {v.vpr_nivel}</span> : <span class="dim">—</span>}</td>
+                  <td>
+                    <form class="row enrich-form" data-id={v.id} style="gap:6px; flex-wrap:nowrap">
+                      <input class="form-control mono" style="padding:6px 9px; font-size:.78rem; width:150px" name="cve" value={v.cve_id || ''} placeholder="CVE-AAAA-NNNN" />
+                      <button class="btn btn-sm btn-primary" type="submit">↻</button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="dim mt" style="font-size:.78rem">Pruebe <span class="code">CVE-2021-44228</span> (Log4Shell) o <span class="code">CVE-2014-0160</span> (Heartbleed).</div>
+      </div>
+    </>
+  )}
+</Layout>
+
+<script>
+  import { API_URL } from '../../lib/api';
+
+  const msg = document.getElementById('msg');
+  function flash(text: string, cls: string) {
+    if (msg) msg.innerHTML = `<div class="flash flash-${cls}">${text}</div>`;
+  }
+
+  document.querySelectorAll<HTMLFormElement>('.enrich-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = form.dataset.id;
+      const cve = (form.querySelector('input[name=cve]') as HTMLInputElement).value.trim();
+      const btn = form.querySelector('button') as HTMLButtonElement;
+      btn.textContent = '…';
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API_URL}/intel/${id}/enrich`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cve_id: cve, usuario: 'Analista (frontend)' }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+          const v = data.vulnerabilidad;
+          flash(`${cve} enriquecido — CVSS ${v.cvss_score ?? '—'} · EPSS ${v.epss_pct ?? '—'}% · ${v.kev ? 'KEV ✔' : 'no-KEV'} · VPR ${v.vpr ?? '—'}. Recargando…`, 'success');
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          flash(data.error || (data.errores || []).join(' ') || 'No se pudo enriquecer.', 'warning');
+        }
+      } catch (err) {
+        flash('Error de red al consultar la API.', 'danger');
+      }
+      btn.textContent = '↻';
+      btn.disabled = false;
+    });
+  });
+</script>

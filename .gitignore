@@ -1,0 +1,38 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Database
+cyberrisk360.db
+*.sqlite3
+
+# Environment
+.env
+*.env.local
+
+# Astro / Node
+astro-frontend/node_modules/
+astro-frontend/dist/
+astro-frontend/.astro/
+astro-frontend/.env
+astro-frontend/.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

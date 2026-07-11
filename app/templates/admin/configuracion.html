@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set active = 'config' %}
+{% block title %}Configuración · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Configuración</b>{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Gobierno del riesgo · ISO 31000 / 27005</div>
+    <h1>Configuración organizacional</h1>
+    <p>Parámetros que rigen la evaluación del riesgo en toda la plataforma.</p>
+  </div>
+</div>
+
+<form method="post" class="card" style="max-width:680px">
+  <div class="field" style="margin-bottom:18px">
+    <label>Organización</label>
+    <input class="form-control" name="organizacion" value="{{ s.organizacion }}">
+  </div>
+
+  <hr class="divider">
+  <div class="card-title">Apetito de riesgo</div>
+  <div class="card-sub">Puntaje de <b>riesgo residual</b> máximo que la organización está dispuesta a tolerar (escala 1–25). Todo riesgo por encima de este umbral se marca como <b>excedido</b> y requiere escalamiento.</div>
+
+  <div class="field" style="max-width:320px">
+    <label>Umbral de apetito de riesgo (1–25)</label>
+    <input class="form-control mono" type="number" name="apetito_riesgo" min="1" max="25" value="{{ s.apetito_riesgo }}">
+    <span class="hint">Referencia: 1–4 Bajo · 5–9 Medio · 10–14 Alto · 15–25 Crítico.</span>
+  </div>
+
+  <div class="row mt" style="gap:8px">
+    <span class="chip chip-bajo">≤ {{ s.apetito_riesgo }} tolerado</span>
+    <span class="chip chip-critico">&gt; {{ s.apetito_riesgo }} escalamiento</span>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Guardar configuración</button>
+  </div>
+</form>
+{% endblock %}

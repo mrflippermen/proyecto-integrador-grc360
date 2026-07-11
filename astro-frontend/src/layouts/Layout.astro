@@ -1,0 +1,43 @@
+---
+import Sidebar from '../components/Sidebar.astro';
+import '../styles/global.scss';
+
+interface Props {
+  title?: string;
+  active?: string;
+  crumb?: string;
+  organizacion?: string;
+}
+const { title = 'CyberRisk 360', active = '', crumb = 'CyberRisk 360', organizacion = 'FinTech Andina S.A.' } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <div class="app">
+      <Sidebar active={active} />
+      <div class="main">
+        <div class="topbar">
+          <div class="crumb" set:html={crumb}></div>
+          <div class="topbar-right">
+            <div class="user-chip">
+              <div class="avatar">A</div>
+              <div class="stack" style="gap:0">
+                <b style="font-size:.82rem">{organizacion}</b>
+                <span class="dim" style="font-size:.72rem">Programa GRC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

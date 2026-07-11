@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de Usuario — CyberRisk 360</title>
+<style>
+  :root{ --ink:#16202e; --muted:#5b6b7f; --line:#dbe2ea; --brand:#2a5fd0; --brand-2:#0d9488;
+    --bajo:#2e9e5b; --medio:#c99700; --alto:#e8590c; --critico:#c92a2a; }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#eef1f5;margin:0;font-size:14px;line-height:1.6}
+  .sheet{max-width:860px;margin:26px auto;background:#fff;padding:52px 60px;box-shadow:0 10px 40px rgba(0,0,0,.10)}
+  h1,h2,h3{margin:0;letter-spacing:-.01em}
+  .head{border-bottom:3px solid var(--ink);padding-bottom:20px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+  .logo{display:flex;align-items:center;gap:12px}
+  .mark{width:40px;height:40px;border-radius:10px;background:conic-gradient(from 140deg,var(--bajo),var(--medio),var(--alto),var(--critico),var(--bajo));flex-shrink:0}
+  .head h1{font-size:1.7rem}
+  .head .sub{color:var(--muted);font-size:.85rem;margin-top:3px}
+  .meta{text-align:right;font-size:.75rem;color:var(--muted)}
+  .live{background:linear-gradient(100deg,#eef4ff,#e9fbf7);border:1px solid #cfe0ff;border-radius:12px;padding:16px 20px;margin-bottom:26px}
+  .live .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.14em;color:var(--brand);font-weight:700}
+  .live a{font-size:1.15rem;font-weight:700;color:var(--brand);word-break:break-all;text-decoration:none}
+  h2{font-size:1.15rem;margin:30px 0 6px;padding-top:16px;border-top:1px solid var(--line)}
+  h2 .n{display:inline-grid;place-items:center;width:26px;height:26px;background:var(--ink);color:#fff;border-radius:7px;font-size:.85rem;margin-right:10px;vertical-align:middle}
+  h3{font-size:.98rem;margin:18px 0 4px;color:var(--brand)}
+  p{margin:6px 0}
+  ol,ul{margin:8px 0;padding-left:22px}
+  li{margin:5px 0}
+  code{background:#f1f4f8;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85em;color:#0f3a86}
+  .callout{background:#fbfaf2;border-left:3px solid var(--medio);border-radius:0 8px 8px 0;padding:11px 16px;margin:14px 0;font-size:.9rem}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .chip{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:999px}
+  .c-b{background:#e6f4ec;color:var(--bajo)} .c-m{background:#fbf3d9;color:var(--medio)} .c-a{background:#fdece1;color:var(--alto)} .c-c{background:#fbe4e4;color:var(--critico)}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;margin:10px 0}
+  th{background:#f4f6f9;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  .foot{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);display:flex;justify-content:space-between}
+  .print-btn{position:fixed;top:16px;right:16px;background:var(--brand);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer;font-size:.85rem;box-shadow:0 4px 14px rgba(42,95,208,.35)}
+  @media print{.print-btn{display:none}body{background:#fff}.sheet{box-shadow:none;margin:0;max-width:none;padding:0}h2{page-break-after:avoid}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+<div class="sheet">
+  <div class="head">
+    <div class="logo"><div class="mark"></div><div><h1>Guía de Usuario</h1><div class="sub">CyberRisk 360 · Sistema de Gestión de Riesgos Cibernéticos · Metodología GRC-360</div></div></div>
+    <div class="meta">ITIZ3301<br>Seguridad Informática<br>Proyecto Integrador</div>
+  </div>
+
+  <div class="live">
+    <div class="lbl">Abrir la aplicación (sin instalar nada)</div>
+    <a href="https://mrflippermen.github.io/proyecto-integrador-grc360/">https://mrflippermen.github.io/proyecto-integrador-grc360/</a>
+    <p style="margin:6px 0 0;color:var(--muted);font-size:.85rem">Compatible con Chrome, Edge, Firefox y Safari, en computador o celular. Sus datos se guardan solo en su navegador; nada se envía a un servidor.</p>
+  </div>
+
+  <h2><span class="n">1</span>Primeros pasos</h2>
+  <p>Al abrir el enlace verá el <b>Panel de monitoreo</b> con un caso de ejemplo (FinTech Andina S.A.) ya cargado: 6 activos y 12 riesgos. A la izquierda está el menú, organizado según las seis fases de la metodología GRC-360. En el celular, use el botón <b>☰ Menú</b>.</p>
+  <div class="callout">Para volver al ejemplo original en cualquier momento: menú → <b>Restablecer demo</b>.</div>
+
+  <h2><span class="n">2</span>Cargar sus datos desde Excel</h2>
+  <p>Es la forma más rápida de llenar el sistema con su propia información.</p>
+  <ol>
+    <li>Menú → <b>Importar Excel/CSV</b>.</li>
+    <li>Elija <b>activos</b> o <b>riesgos</b> y pulse <b>Descargar plantilla (.xlsx)</b>.</li>
+    <li>Abra la plantilla en Excel, borre la fila de ejemplo y escriba sus datos.</li>
+    <li>Arrastre el archivo a la zona de carga (o haga clic para seleccionarlo).</li>
+    <li>Revise la vista previa —las filas con error se marcan en rojo— y pulse <b>Importar</b>.</li>
+  </ol>
+  <div class="cols">
+    <div><h3>Plantilla de activos</h3><p style="font-size:.85rem"><code>codigo</code>, <code>nombre</code>, <code>tipo</code>, <code>propietario</code>, <code>confidencialidad</code>, <code>integridad</code>, <code>disponibilidad</code>, <code>descripcion</code>. Los valores CIA van de 1 a 5.</p></div>
+    <div><h3>Plantilla de riesgos</h3><p style="font-size:.85rem"><code>codigo</code>, <code>activo_codigo</code>, <code>amenaza</code>, <code>vulnerabilidad</code>, <code>probabilidad</code>, <code>impacto</code>, <code>estado</code>, <code>descripcion</code>. P e I van de 1 a 5.</p></div>
+  </div>
+  <div class="callout">Acepta <b>.xlsx</b>, <b>.xls</b> y <b>.csv</b>. Si una amenaza o vulnerabilidad no existe, se crea automáticamente al importar.</div>
+
+  <h2><span class="n">3</span>Fase 1 — Valoración de activos</h2>
+  <ol>
+    <li>Menú → <b>Valoración de activos</b> → <b>+ Nuevo activo</b>.</li>
+    <li>Complete código, nombre, tipo y propietario.</li>
+    <li>Valore el activo (1–5) en <b>Confidencialidad</b> (si se divulga), <b>Integridad</b> (si se altera) y <b>Disponibilidad</b> (si deja de estar disponible).</li>
+    <li>Guarde. El <b>valor del activo</b> es la dimensión más alta.</li>
+  </ol>
+
+  <h2><span class="n">2</span>Fase 2 — Identificación de riesgos</h2>
+  <ol>
+    <li>Menú → <b>Identificación de riesgos</b> → <b>+ Nuevo riesgo</b>.</li>
+    <li>Elija el <b>activo</b>, la <b>amenaza</b> y la <b>vulnerabilidad</b>.</li>
+    <li>Valore <b>probabilidad</b> e <b>impacto</b> (1–5).</li>
+  </ol>
+  <p>El sistema calcula el <b>riesgo inherente = Probabilidad × Impacto</b> y lo clasifica:
+    <span class="chip c-b">Bajo 1–4</span> <span class="chip c-m">Medio 5–9</span> <span class="chip c-a">Alto 10–14</span> <span class="chip c-c">Crítico 15–25</span></p>
+  <p>Use la búsqueda y el filtro por nivel. Haga clic en un riesgo para ver su ficha.</p>
+
+  <h2><span class="n">3</span>Fases 3 y 4 — Tratamiento y riesgo residual</h2>
+  <ol>
+    <li>Abra un riesgo y pulse <b>+ Añadir</b> en «Plan de tratamiento».</li>
+    <li>Elija la estrategia: <b>Mitigar</b>, <b>Transferir</b>, <b>Aceptar</b> o <b>Evitar</b>.</li>
+    <li>Seleccione un control <b>ISO/IEC 27002:2022</b>, el responsable y la <b>eficacia</b> (0–90 %).</li>
+    <li>Marque el <b>estado</b> del control.</li>
+  </ol>
+  <div class="callout">Solo los controles en estado <b>Implementado</b> o <b>Verificado</b> reducen el riesgo. El <b>riesgo residual</b> se recalcula automáticamente y muestra el porcentaje de reducción.</div>
+
+  <h2><span class="n">5</span>Fase 5 — Inteligencia de amenazas y comunicación</h2>
+  <p>En <b>Inteligencia de amenazas</b>, escriba un <b>CVE</b> (p. ej. <code>CVE-2021-44228</code>) y pulse <b>↻</b>: el sistema completa el <b>CVSS</b> (severidad), el <b>EPSS</b> (probabilidad de explotación), si está en <b>CISA KEV</b> (explotación activa) y calcula el <b>VPR</b> (prioridad de remediación).</p>
+
+  <h2><span class="n">6</span>Fase 6 — Monitoreo y cumplimiento</h2>
+  <p>El <b>Panel de monitoreo</b> muestra los indicadores clave, el <b>Cyber Exposure Score</b> (0–1000), las alertas de <b>apetito de riesgo</b> y <b>SLA vencidos</b>, la <b>matriz 5×5</b> y la tendencia del riesgo. En <b>Cumplimiento</b> verá la cobertura frente a <b>ISO 27002:2022</b> y <b>NIST CSF 2.0</b>.</p>
+
+  <h2 style="border-top:none">Preguntas frecuentes</h2>
+  <table>
+    <tr><th>Pregunta</th><th>Respuesta</th></tr>
+    <tr><td>¿Necesito instalar algo?</td><td>No. Solo abrir el enlace.</td></tr>
+    <tr><td>¿Se pierden mis datos al cerrar?</td><td>No, se guardan en su navegador. En modo incógnito u otro navegador se empieza de nuevo.</td></tr>
+    <tr><td>¿Cómo vuelvo al ejemplo?</td><td>Menú → Restablecer demo.</td></tr>
+    <tr><td>¿Formatos de importación?</td><td>.xlsx, .xls y .csv.</td></tr>
+    <tr><td>¿Funciona en celular?</td><td>Sí, con el botón ☰ Menú.</td></tr>
+  </table>
+
+  <div class="foot">
+    <span>CyberRisk 360 — Guía de usuario</span>
+    <span>Metodología GRC-360 · ISO/IEC 27001 · 27002:2022 · NIST CSF 2.0</span>
+  </div>
+</div>
+</body>
+</html>

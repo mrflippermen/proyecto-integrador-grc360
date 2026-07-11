@@ -1,0 +1,42 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAudit, API_URL, type AuditEntry } from '../../lib/api';
+
+let logs: AuditEntry[] = [];
+let error = '';
+try {
+  logs = await getAudit();
+} catch (e) {
+  error = 'No se pudo conectar con la API Flask (¿está corriendo en :5000?).';
+}
+---
+<Layout title="Auditoría · CyberRisk 360" active="audit" crumb="<b>Bitácora de auditoría</b>">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">ISO/IEC 27002:2022 — 8.15 Registro de eventos</div>
+      <h1>Bitácora de auditoría</h1>
+      <p>Registro cronológico de las acciones realizadas en la plataforma, para trazabilidad y rendición de cuentas.</p>
+    </div>
+    <a class="btn" href={`${API_URL}/../admin/exportar/riesgos.csv`}>Exportar riesgos (CSV)</a>
+  </div>
+
+  {error && <div class="flash flash-danger">{error}</div>}
+
+  <div class="table-wrap">
+    <table class="data">
+      <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead>
+      <tbody>
+        {logs.map((l) => (
+          <tr>
+            <td class="mono dim" style="font-size:.8rem">{new Date(l.creado_en).toLocaleString('es')}</td>
+            <td>{l.usuario}</td>
+            <td><span class={`tag ${['CREAR', 'ENRIQUECER'].includes(l.accion) ? 'tag-brand' : ''}`}>{l.accion}</span></td>
+            <td class="muted">{l.entidad}</td>
+            <td class="dim" style="font-size:.85rem">{l.detalle}</td>
+          </tr>
+        ))}
+        {logs.length === 0 && <tr><td colspan="5"><div class="empty-state"><p>No hay eventos registrados aún.</p></div></td></tr>}
+      </tbody>
+    </table>
+  </div>
+</Layout>

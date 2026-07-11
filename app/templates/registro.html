@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta · CyberRisk 360{% endblock %}
+{% block auth_content %}
+<div style="min-height:100vh; display:grid; place-items:center; background:var(--bg); padding:40px;">
+  <div style="width:100%; max-width:400px;">
+    <div class="brand" style="justify-content:center; margin-bottom:24px;">
+      <div class="brand-mark"><span></span></div>
+      <div class="brand-name">CyberRisk 360<small>Gestión de Riesgos</small></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.35rem; margin-bottom:6px;">Crear cuenta de analista</h2>
+      <p class="muted" style="margin-bottom:20px; font-size:.88rem;">Complete sus datos para acceder a la plataforma.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+      {% endwith %}
+
+      <form method="post" class="stack" style="gap:15px;">
+        <div class="field">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input class="form-control" type="text" name="nombre" value="{{ nombre or '' }}" required minlength="3">
+        </div>
+        <div class="field">
+          <label>Correo electrónico <span class="req">*</span></label>
+          <input class="form-control" type="email" name="email" value="{{ email or '' }}" required>
+        </div>
+        <div class="field">
+          <label>Contraseña <span class="req">*</span></label>
+          <input class="form-control" type="password" name="password" required minlength="6">
+          <span class="hint">Mínimo 6 caracteres.</span>
+        </div>
+        <button class="btn btn-primary" style="justify-content:center;" type="submit">Crear cuenta</button>
+      </form>
+    </div>
+    <p class="dim center mt" style="font-size:.85rem;">¿Ya tiene cuenta? <a href="{{ url_for('auth.login') }}">Inicie sesión</a></p>
+  </div>
+</div>
+{% endblock %}

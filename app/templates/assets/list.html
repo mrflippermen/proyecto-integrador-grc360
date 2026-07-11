@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set active = 'assets' %}
+{% block title %}Activos · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Valoración de activos</b> · Fase 1{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 1 — Valoración de activos</div>
+    <h1>Inventario de activos de información</h1>
+    <p>Registro y clasificación de activos con valoración CIA (Confidencialidad, Integridad, Disponibilidad) en escala 1–5. El valor del activo es la dimensión más crítica.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('assets.editar') }}">
+    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Nuevo activo
+  </a>
+</div>
+
+{% if activos %}
+<div class="table-wrap">
+  <table class="data">
+    <thead>
+      <tr><th>Código</th><th>Activo</th><th>Tipo</th><th>Propietario</th><th class="center">C</th><th class="center">I</th><th class="center">D</th><th>Valor</th><th>Riesgos</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for a in activos %}
+      <tr>
+        <td><span class="code">{{ a.codigo }}</span></td>
+        <td><div class="stack" style="gap:2px"><b>{{ a.nombre }}</b><span class="dim" style="font-size:.78rem">{{ a.descripcion|truncate(60) }}</span></div></td>
+        <td><span class="tag">{{ a.tipo }}</span></td>
+        <td class="muted">{{ a.propietario or '—' }}</td>
+        <td class="center mono">{{ a.confidencialidad }}</td>
+        <td class="center mono">{{ a.integridad }}</td>
+        <td class="center mono">{{ a.disponibilidad }}</td>
+        <td>
+          {% set nv = nivel_desde_puntaje(a.valor * 5) %}
+          <span class="chip chip-{{ nv[0]|lower }}">{{ a.valor }} · {{ a.valor_texto }}</span>
+        </td>
+        <td class="center mono">{{ a.riesgos|length }}</td>
+        <td class="right">
+          <div class="row" style="gap:6px; justify-content:flex-end; flex-wrap:nowrap">
+            <a class="btn btn-sm btn-ghost" href="{{ url_for('assets.editar', asset_id=a.id) }}">Editar</a>
+            <form method="post" action="{{ url_for('assets.eliminar', asset_id=a.id) }}" onsubmit="return confirm('¿Eliminar el activo {{ a.codigo }}?')">
+              <button class="btn btn-sm btn-danger" type="submit">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card"><div class="empty-state">
+  <h3>No hay activos registrados</h3>
+  <p>Comience registrando los activos de información de la organización.</p>
+  <a class="btn btn-primary mt" href="{{ url_for('assets.editar') }}">Registrar primer activo</a>
+</div></div>
+{% endif %}
+{% endblock %}

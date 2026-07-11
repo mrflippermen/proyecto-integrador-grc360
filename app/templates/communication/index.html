@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% set active = 'comm' %}
+{% block title %}Comunicación · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Comunicación y consulta</b> · Fase 5{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 5 — Comunicación y consulta</div>
+    <h1>Observaciones y recomendaciones</h1>
+    <p>Registro de comunicaciones dirigidas a las partes interesadas sobre el estado y tratamiento de los riesgos.</p>
+  </div>
+</div>
+
+<div class="grid grid-2" style="grid-template-columns: .8fr 1.2fr">
+  <!-- Nueva observación -->
+  <div class="card" style="align-self:start">
+    <div class="card-title">Nueva observación</div>
+    <form method="post" class="stack" style="gap:14px">
+      <div class="field">
+        <label>Tipo</label>
+        <select class="form-control" name="tipo">
+          <option value="Recomendación">Recomendación</option>
+          <option value="Observación">Observación</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Riesgo asociado (opcional)</label>
+        <select class="form-control" name="risk_id">
+          <option value="">— General —</option>
+          {% for r in riesgos %}<option value="{{ r.id }}">{{ r.codigo }} · {{ r.amenaza.nombre }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label>Contenido <span class="req">*</span></label>
+        <textarea class="form-control" name="contenido" required minlength="5" placeholder="Escriba la observación o recomendación..."></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Registrar</button>
+    </form>
+  </div>
+
+  <!-- Historial -->
+  <div class="card">
+    <div class="card-title">Historial de comunicación <span class="tag">{{ observaciones|length }}</span></div>
+    <div class="card-sub">Ordenado de la más reciente a la más antigua.</div>
+    <ul class="list-plain">
+      {% for o in observaciones %}
+      <li class="obs">
+        <div class="row between">
+          <div class="obs-meta">
+            <span class="tag {{ 'tag-brand' if o.tipo=='Recomendación' }}">{{ o.tipo }}</span>
+            {{ o.autor }} · {{ o.creado_en.strftime('%d/%m/%Y %H:%M') }}
+            {% if o.risk_id %}<span class="code">→ {{ o.riesgo.codigo }}</span>{% endif %}
+          </div>
+          <form method="post" action="{{ url_for('communication.eliminar', obs_id=o.id) }}" onsubmit="return confirm('¿Eliminar?')">
+            <button class="btn btn-sm btn-danger" type="submit">×</button>
+          </form>
+        </div>
+        <div style="font-size:.9rem; margin-top:4px">{{ o.contenido }}</div>
+      </li>
+      {% else %}
+      <div class="empty-state"><p>Aún no hay observaciones registradas.</p></div>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

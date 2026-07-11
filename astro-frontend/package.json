@@ -1,0 +1,21 @@
+{
+  "name": "cyberrisk360-frontend",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Frontend Astro + SCSS + TypeScript de CyberRisk 360 (consume la API Flask).",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "node ./dist/server/entry.mjs"
+  },
+  "dependencies": {
+    "@astrojs/node": "^8.3.4",
+    "astro": "^4.16.18",
+    "chart.js": "^4.4.3"
+  },
+  "devDependencies": {
+    "sass": "^1.77.8",
+    "typescript": "^5.5.4"
+  }
+}

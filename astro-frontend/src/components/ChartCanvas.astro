@@ -1,0 +1,37 @@
+---
+// Isla de gráfico: renderiza un <canvas> cuya configuración Chart.js viaja
+// serializada en el atributo data-chart. Un único script cliente (TypeScript)
+// hidrata todos los canvas de la página.
+interface Props { id: string; height?: number; config: unknown; }
+const { id, height = 240, config } = Astro.props;
+---
+<div style={`height:${height}px; position:relative`}>
+  <canvas id={id} data-chart={JSON.stringify(config)}></canvas>
+</div>
+
+<script>
+  import Chart from 'chart.js/auto';
+
+  // Estilo global coherente con el sistema de diseño.
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#93a1b8';
+  Chart.defaults.borderColor = 'rgba(41,53,75,.5)';
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.boxWidth = 8;
+  Chart.defaults.plugins.legend.labels.padding = 14;
+
+  document.querySelectorAll<HTMLCanvasElement>('canvas[data-chart]').forEach((canvas) => {
+    if (canvas.dataset.rendered) return;
+    canvas.dataset.rendered = '1';
+    const cfg = JSON.parse(canvas.dataset.chart as string);
+
+    // Reconstruye el callback de tooltip para series indexadas (valor real).
+    if (cfg.options?.plugins?.tooltip?._realValues) {
+      cfg.options.plugins.tooltip.callbacks = {
+        label: (c: any) => `${c.dataset.label}: ${c.dataset._real?.[c.dataIndex] ?? c.parsed.y}`,
+      };
+    }
+    new Chart(canvas, cfg);
+  });
+</script>

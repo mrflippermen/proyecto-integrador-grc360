@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Informe ejecutivo de riesgos · CyberRisk 360</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root{ --ink:#16202e; --muted:#5b6b7f; --line:#dbe2ea; --brand:#2a5fd0;
+      --bajo:#2e9e5b; --medio:#c99700; --alto:#e8590c; --critico:#c92a2a; }
+    *{ box-sizing:border-box; }
+    body{ font-family:"Inter",sans-serif; color:var(--ink); background:#eef1f5; margin:0; font-size:13px; line-height:1.5; }
+    .toolbar{ position:sticky; top:0; background:#0e131f; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; }
+    .toolbar a,.toolbar button{ font-family:"Inter"; font-size:.85rem; font-weight:600; padding:8px 16px; border-radius:8px; border:1px solid #29354b; background:#1e2a3e; color:#e8edf5; cursor:pointer; text-decoration:none; }
+    .toolbar .print{ background:#4c82f7; border-color:transparent; }
+    .sheet{ max-width:900px; margin:24px auto; background:#fff; padding:48px 54px; box-shadow:0 10px 40px rgba(0,0,0,.12); }
+    h1,h2,h3{ font-family:"Space Grotesk"; margin:0; }
+    .head{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid var(--ink); padding-bottom:18px; margin-bottom:26px; }
+    .head h1{ font-size:1.7rem; letter-spacing:-.02em; }
+    .head .sub{ color:var(--muted); font-size:.82rem; margin-top:4px; }
+    .logo{ display:flex; align-items:center; gap:10px; }
+    .logo .mark{ width:34px;height:34px;border-radius:9px; background:conic-gradient(from 140deg,var(--bajo),var(--medio),var(--alto),var(--critico),var(--bajo)); }
+    .meta{ text-align:right; font-size:.76rem; color:var(--muted); }
+    .eyebrow{ font-size:.68rem; text-transform:uppercase; letter-spacing:.16em; color:var(--brand); font-weight:700; margin:30px 0 10px; }
+    .kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+    .kpi{ border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+    .kpi .v{ font-family:"Space Grotesk"; font-size:1.7rem; font-weight:700; }
+    .kpi .l{ font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    table{ width:100%; border-collapse:collapse; font-size:.8rem; margin-top:8px; }
+    th{ text-align:left; background:#f4f6f9; padding:9px 10px; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); border-bottom:1px solid var(--line); }
+    td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+    .code{ font-family:"JetBrains Mono"; color:var(--brand); font-size:.78rem; }
+    .chip{ display:inline-block; font-family:"JetBrains Mono"; font-size:.7rem; font-weight:600; padding:2px 8px; border-radius:999px; }
+    .c-bajo{ background:#e6f4ec; color:var(--bajo); } .c-medio{ background:#fbf3d9; color:var(--medio); }
+    .c-alto{ background:#fdece1; color:var(--alto); } .c-critico{ background:#fbe4e4; color:var(--critico); }
+    .prose{ font-size:.86rem; color:#2a3646; } .prose p{ margin:8px 0; }
+    .foot{ margin-top:40px; padding-top:16px; border-top:1px solid var(--line); font-size:.72rem; color:var(--muted); display:flex; justify-content:space-between; }
+    ul.rec{ margin:8px 0; padding-left:18px; } ul.rec li{ margin:6px 0; font-size:.84rem; }
+    @media print{ .toolbar{ display:none; } body{ background:#fff; } .sheet{ box-shadow:none; margin:0; max-width:none; padding:0; } }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <a href="{{ url_for('reports.index') }}">← Volver</a>
+    <button class="print" onclick="window.print()">Exportar / Imprimir PDF</button>
+  </div>
+
+  <div class="sheet">
+    <div class="head">
+      <div>
+        <div class="logo"><div class="mark"></div><div><h1>Informe Ejecutivo de Riesgos</h1><div class="sub">Sistema de Gestión de Riesgos Cibernéticos · Metodología GRC-360</div></div></div>
+      </div>
+      <div class="meta">Generado: {{ fecha }}<br>Por: {{ generado_por }}<br>ISO/IEC 27001 · 27002:2022 · 27005</div>
+    </div>
+
+    <div class="eyebrow">1. Resumen de la postura de riesgo</div>
+    <div class="kpis">
+      <div class="kpi"><div class="v">{{ activos|length }}</div><div class="l">Activos</div></div>
+      <div class="kpi"><div class="v">{{ riesgos|length }}</div><div class="l">Riesgos</div></div>
+      <div class="kpi"><div class="v">{{ criticos|length }}</div><div class="l">Nivel Alto/Crítico</div></div>
+      <div class="kpi"><div class="v">{{ reduccion_global }}%</div><div class="l">Reducción lograda</div></div>
+    </div>
+    <div class="prose"><p>La organización mantiene {{ riesgos|length }} riesgos identificados sobre {{ activos|length }} activos de información. Mediante la aplicación de {{ total_controles }} controles de tratamiento alineados a ISO/IEC 27002:2022, el nivel de riesgo agregado se ha reducido en un <b>{{ reduccion_global }}%</b> respecto al riesgo inherente. {% if criticos %}Persisten <b>{{ criticos|length }}</b> riesgos de nivel Alto o Crítico que requieren seguimiento prioritario de la dirección.{% else %}No persisten riesgos residuales de nivel Alto o Crítico.{% endif %}</p></div>
+
+    <div class="eyebrow">2. Registro de riesgos y tratamiento</div>
+    <table>
+      <thead><tr><th>Cód.</th><th>Activo</th><th>Amenaza</th><th>Inherente</th><th>Residual</th><th>Estrategia</th><th>Estado</th></tr></thead>
+      <tbody>
+        {% for r in riesgos %}
+        <tr>
+          <td><span class="code">{{ r.codigo }}</span></td>
+          <td>{{ r.activo.nombre }}</td>
+          <td>{{ r.amenaza.nombre }}</td>
+          <td><span class="chip c-{{ r.nivel_inherente[0]|lower }}">{{ r.puntaje_inherente }} {{ r.nivel_inherente[0] }}</span></td>
+          <td><span class="chip c-{{ r.nivel_residual[0]|lower }}">{{ r.puntaje_residual }} {{ r.nivel_residual[0] }}</span></td>
+          <td>{{ r.tratamientos|map(attribute='estrategia')|unique|join(', ') or '—' }}</td>
+          <td>{{ r.estado }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="eyebrow">3. Activos de información valorados</div>
+    <table>
+      <thead><tr><th>Cód.</th><th>Activo</th><th>Tipo</th><th>Propietario</th><th>C</th><th>I</th><th>D</th><th>Valor</th></tr></thead>
+      <tbody>
+        {% for a in activos %}
+        <tr><td><span class="code">{{ a.codigo }}</span></td><td>{{ a.nombre }}</td><td>{{ a.tipo }}</td><td>{{ a.propietario or '—' }}</td>
+          <td>{{ a.confidencialidad }}</td><td>{{ a.integridad }}</td><td>{{ a.disponibilidad }}</td>
+          <td><b>{{ a.valor }} · {{ a.valor_texto }}</b></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="eyebrow">4. Recomendaciones y observaciones</div>
+    {% if observaciones %}
+    <ul class="rec">
+      {% for o in observaciones %}<li><b>{{ o.tipo }}{% if o.risk_id %} ({{ o.riesgo.codigo }}){% endif %}:</b> {{ o.contenido }} <i style="color:var(--muted)">— {{ o.autor }}</i></li>{% endfor %}
+    </ul>
+    {% else %}<div class="prose"><p>No se registraron observaciones.</p></div>{% endif %}
+
+    <div class="foot">
+      <span>CyberRisk 360 — Documento confidencial · Uso interno</span>
+      <span>ITIZ3301 · Seguridad Informática · Proyecto Integrador</span>
+    </div>
+  </div>
+</body>
+</html>

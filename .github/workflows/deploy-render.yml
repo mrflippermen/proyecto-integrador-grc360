@@ -1,0 +1,13 @@
+name: Deploy a Render (blueprint)
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Render Deploy Hook
+        if: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

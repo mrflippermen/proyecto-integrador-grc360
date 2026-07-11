@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set active = 'audit' %}
+{% block title %}Auditoría · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Bitácora de auditoría</b>{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">ISO/IEC 27002:2022 — 8.15 Registro de eventos</div>
+    <h1>Bitácora de auditoría</h1>
+    <p>Registro cronológico de las acciones realizadas en la plataforma, para trazabilidad y rendición de cuentas.</p>
+  </div>
+  <a class="btn" href="{{ url_for('admin.exportar_riesgos') }}">
+    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+    Exportar riesgos (CSV)
+  </a>
+</div>
+
+<div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td class="mono dim" style="font-size:.8rem">{{ log.creado_en.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+        <td>{{ log.usuario }}</td>
+        <td>
+          {% set c = {'CREAR':'tag-brand','EDITAR':'tag','ELIMINAR':'chip-critico','ENRIQUECER':'chip-medio','EXPORTAR':'tag'} %}
+          <span class="tag {{ 'tag-brand' if log.accion in ['CREAR','ENRIQUECER'] }}">{{ log.accion }}</span>
+        </td>
+        <td class="muted">{{ log.entidad }}</td>
+        <td class="dim" style="font-size:.85rem">{{ log.detalle }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5"><div class="empty-state"><p>No hay eventos registrados aún.</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

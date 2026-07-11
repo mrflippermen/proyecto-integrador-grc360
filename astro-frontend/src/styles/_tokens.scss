@@ -1,0 +1,55 @@
+// =========================================================================
+//  Tokens del sistema de diseño "Consola de Operaciones de Riesgo"
+//  Variables y mixins SCSS reutilizados por global.scss
+// =========================================================================
+
+// --- Espectro de severidad (deriva del modelo de riesgo) ---
+$sev-bajo: #2e9e5b;
+$sev-medio: #e0a800;
+$sev-alto: #e8590c;
+$sev-critico: #d63a3a;
+
+// --- Marca ---
+$brand: #4c82f7;
+$brand-2: #34d3c0;
+
+// --- Base slate ---
+$bg: #0e131f;
+$bg-2: #121a29;
+$surface: #182233;
+$surface-2: #1e2a3e;
+$border: #29354b;
+$border-soft: #212c40;
+$text: #e8edf5;
+$text-muted: #93a1b8;
+$text-dim: #64748b;
+
+$radius: 12px;
+$radius-sm: 8px;
+
+// Mapa de severidad para iterar en global.scss
+$severidades: (
+  'bajo': $sev-bajo,
+  'medio': $sev-medio,
+  'alto': $sev-alto,
+  'critico': $sev-critico,
+);
+
+// --- Mixins ---
+@mixin card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+@mixin chip($color, $bg) {
+  color: $color;
+  background: $bg;
+}
+
+@mixin focus-ring {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(76, 130, 247, 0.35);
+}

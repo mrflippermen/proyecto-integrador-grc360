@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% set active = 'risks' %}
+{% block title %}Riesgos · CyberRisk 360{% endblock %}
+{% block crumb %}<b>Identificación de riesgos</b> · Fase 2{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <div class="eyebrow">Fase 2 — Identificación y análisis de riesgos</div>
+    <h1>Registro de riesgos</h1>
+    <p>Cada riesgo combina un activo, una amenaza y una vulnerabilidad, valorado por Probabilidad × Impacto. Ordenado por riesgo residual.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('risks.editar') }}">
+    <svg class="ico ico-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Nuevo riesgo
+  </a>
+</div>
+
+{% if riesgos %}
+<div class="card" style="padding:14px 16px; margin-bottom:14px">
+  <div class="row" style="gap:10px">
+    <input class="form-control" id="filtro" style="max-width:340px" placeholder="Buscar por código, activo, amenaza..." oninput="filtrar()">
+    <select class="form-control" id="filtroNivel" style="max-width:180px" onchange="filtrar()">
+      <option value="">Todos los niveles (residual)</option>
+      <option value="crítico">Crítico</option><option value="alto">Alto</option>
+      <option value="medio">Medio</option><option value="bajo">Bajo</option>
+    </select>
+    <span class="dim" id="conteo" style="font-size:.82rem; margin-left:auto">{{ riesgos|length }} riesgos</span>
+  </div>
+</div>
+<div class="table-wrap">
+  <table class="data" id="tablaRiesgos">
+    <thead>
+      <tr><th>Código</th><th>Activo</th><th>Amenaza / Vulnerabilidad</th><th>P×I</th><th>Inherente</th><th>Residual</th><th>Estado</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for r in riesgos %}
+      <tr onclick="window.location='{{ url_for('risks.detalle', risk_id=r.id) }}'" style="cursor:pointer"
+          data-busca="{{ (r.codigo ~ ' ' ~ r.activo.nombre ~ ' ' ~ r.amenaza.nombre ~ ' ' ~ r.vulnerabilidad.nombre)|lower }}"
+          data-nivel="{{ r.nivel_residual[0]|lower }}">
+        <td><span class="code">{{ r.codigo }}</span></td>
+        <td>{{ r.activo.nombre }}</td>
+        <td class="stack" style="gap:2px">
+          <span>{{ r.amenaza.nombre }}</span>
+          <span class="dim" style="font-size:.78rem">{{ r.vulnerabilidad.nombre }}</span>
+        </td>
+        <td class="mono muted">{{ r.probabilidad }}×{{ r.impacto }}</td>
+        <td><span class="chip chip-{{ r.nivel_inherente[0]|lower }}">{{ r.puntaje_inherente }} · {{ r.nivel_inherente[0] }}</span></td>
+        <td>
+          <div class="compare">
+            <span class="chip chip-{{ r.nivel_residual[0]|lower }}">{{ r.puntaje_residual }} · {{ r.nivel_residual[0] }}</span>
+            {% if r.reduccion_pct > 0 %}<span class="dim" style="font-size:.74rem">−{{ r.reduccion_pct }}%</span>{% endif %}
+          </div>
+        </td>
+        <td><span class="tag">{{ r.estado }}</span></td>
+        <td class="right dim">›</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card"><div class="empty-state">
+  <h3>No hay riesgos registrados</h3>
+  <p>Registre riesgos combinando activos, amenazas y vulnerabilidades.</p>
+  <a class="btn btn-primary mt" href="{{ url_for('risks.editar') }}">Registrar primer riesgo</a>
+</div></div>
+{% endif %}
+{% endblock %}
